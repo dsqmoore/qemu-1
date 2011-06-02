@@ -3153,10 +3153,11 @@ int main(int argc, char **argv, char **envp)
         qdev_prop_register_global_list(machine->compat_props);
     }
     qemu_add_globals();
+    printf("cpu_model:\t%s\n",cpu_model);
 
+    android_serial_init();
     machine->init(ram_size, boot_devices,
                   kernel_filename, kernel_cmdline, initrd_filename, cpu_model);
-    android_serial_init();
 
     cpu_synchronize_all_post_init();
 

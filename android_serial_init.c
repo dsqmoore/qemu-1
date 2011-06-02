@@ -6,11 +6,10 @@
 
 void android_serial_init(void)
 {
-    // Serial port working
     CPUState *env;
     qemu_irq *cpu_pic;
     qemu_irq *goldfish_pic;
-    char* cpu_model = "arm926";
+    const char* cpu_model = "arm926";
 
     env = cpu_init(cpu_model);
     cpu_pic = arm_pic_init_cpu(env);
@@ -18,6 +17,5 @@ void android_serial_init(void)
     goldfish_device_init(goldfish_pic, 0xff010000, 0x7f0000, 10, 22);
     goldfish_device_bus_init(0xff001000, 1);
     goldfish_tty_add(serial_hds[0], 0, 0xff002000, 4);
-    // End of serial port code
 
 }
