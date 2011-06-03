@@ -176,7 +176,7 @@ static void goldfish_tty_write(void *opaque, target_phys_addr_t offset, uint32_t
             cpu_abort (cpu_single_env, "goldfish_tty_write: Bad offset %x\n", offset);
     }
 }
-/* TODO: needed for qemu_chr_add_handlers
+
 static int tty_can_receive(void *opaque)
 {
     struct tty_state *s = opaque;
@@ -193,7 +193,6 @@ static void tty_receive(void *opaque, const uint8_t *buf, int size)
     if(s->data_count > 0 && s->ready)
         goldfish_device_set_irq(&s->dev, 0, 1);
 }
-*/
 
 static CPUReadMemoryFunc *goldfish_tty_readfn[] = {
     goldfish_tty_read,
@@ -223,7 +222,7 @@ int goldfish_tty_add(CharDriverState *cs, int id, uint32_t base, int irq)
     s->cs = cs;
 
     if(cs) {
-        //qemu_chr_add_handlers(cs, tty_can_receive, tty_receive, NULL, s);
+        qemu_chr_add_handlers(cs, tty_can_receive, tty_receive, NULL, s);
     }
 
     ret = goldfish_device_add(&s->dev, goldfish_tty_readfn, goldfish_tty_writefn, s);
