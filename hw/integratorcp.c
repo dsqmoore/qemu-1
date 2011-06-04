@@ -455,7 +455,7 @@ static struct arm_boot_info integrator_binfo = {
     .board_id = 0x113,
 };
 
-#define TEST_SWITCH 1
+#define TEST_SWITCH 0
 #if TEST_SWITCH
 uint32_t switch_test_write(void *opaque, uint32_t state)
 {
