@@ -493,6 +493,7 @@ static void integratorcp_init(ram_addr_t ram_size,
     goldfish_pic = goldfish_interrupt_init(0xff000000, cpu_pic[ARM_PIC_CPU_IRQ], cpu_pic[ARM_PIC_CPU_FIQ]);
     goldfish_device_init(goldfish_pic, 0xff010000, 0x7f0000, 10, 22);
     goldfish_device_bus_init(0xff001000, 1);
+    goldfish_timer_and_rtc_init(0xff003000, 3);
     goldfish_tty_add(serial_hds[0], 0, 0xff002000, 4);
     goldfish_memlog_init(0xff006000);
     {
