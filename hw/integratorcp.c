@@ -17,6 +17,7 @@
 #include "qemu-common.h"
 #include "goldfish_device.h"
 #include "sysemu.h"
+#include "blockdev.h"
 
 typedef struct {
     SysBusDevice busdev;
@@ -494,6 +495,12 @@ static void integratorcp_init(ram_addr_t ram_size,
     goldfish_device_bus_init(0xff001000, 1);
     goldfish_tty_add(serial_hds[0], 0, 0xff002000, 4);
     goldfish_memlog_init(0xff006000);
+    {
+        DriveInfo* info = drive_get( IF_IDE, 0, 0 );
+        if (info != NULL) {
+            goldfish_mmc_init(0xff005000, 0, info->bdrv);
+        }
+    }
 
     dev = sysbus_create_varargs("integrator_pic", 0x14000000,
                                 cpu_pic[ARM_PIC_CPU_IRQ],
