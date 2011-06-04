@@ -40,12 +40,11 @@ int goldfish_device_bus_init(uint32_t base, uint32_t irq);
 
 // device init functions:
 qemu_irq *goldfish_interrupt_init(uint32_t base, qemu_irq parent_irq, qemu_irq parent_fiq);
-//void goldfish_timer_and_rtc_init(uint32_t timerbase, int timerirq);
+void goldfish_timer_and_rtc_init(uint32_t timerbase, int timerirq);
 int goldfish_tty_add(CharDriverState *cs, int id, uint32_t base, int irq);
-/*
 void goldfish_fb_init(int id);
 void goldfish_audio_init(uint32_t base, int id, const char* input_source);
-void goldfish_battery_init();
+void goldfish_battery_init(void);
 void goldfish_battery_set_prop(int ac, int property, int value);
 void goldfish_battery_display(void (* callback)(void *data, const char* string), void *data);
 void goldfish_mmc_init(uint32_t base, int id, BlockDriverState* bs);
@@ -53,8 +52,7 @@ void *goldfish_switch_add(char *name, uint32_t (*writefn)(void *opaque, uint32_t
 void goldfish_switch_set_state(void *opaque, uint32_t state);
 
 // these do not add a device
-void trace_dev_init();
-*/
+void trace_dev_init(void);
 void events_dev_init(uint32_t base, qemu_irq irq);
 void nand_dev_init(uint32_t base);
 
