@@ -510,6 +510,7 @@ static void integratorcp_init(ram_addr_t ram_size,
             goldfish_mmc_init(0xff005000, 0, info->bdrv);
         }
     }
+    goldfish_battery_init();
 #if TEST_SWITCH
     {
         void *sw;
