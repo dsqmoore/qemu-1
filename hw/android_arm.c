@@ -50,6 +50,11 @@ static struct goldfish_device nand_device = {
 
 /* Board init.  */
 
+static struct arm_boot_info info = {
+    .loader_start = 0x0,
+    .board_id = 1441,
+};
+
 #define TEST_SWITCH 1
 #if TEST_SWITCH
 uint32_t switch_test_write(void *opaque, uint32_t state)
@@ -69,7 +74,6 @@ static void android_arm_init_(ram_addr_t ram_size,
     qemu_irq *cpu_pic;
     qemu_irq *goldfish_pic;
     int i;
-    struct arm_boot_info  info;
     ram_addr_t ram_offset;
 
     if (!cpu_model)
@@ -169,13 +173,11 @@ static void android_arm_init_(ram_addr_t ram_size,
     }
 #endif
 
-    memset(&info, 0, sizeof info);
     info.ram_size        = ram_size;
     info.kernel_filename = kernel_filename;
     info.kernel_cmdline  = kernel_cmdline;
     info.initrd_filename = initrd_filename;
     info.nb_cpus         = 1;
-    info.board_id        = 1441;
 
     arm_load_kernel(env, &info);
 }
