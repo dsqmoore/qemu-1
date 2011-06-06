@@ -210,7 +210,7 @@ int goldfish_tty_add(CharDriverState *cs, int id, uint32_t base, int irq)
 {
     int ret;
     struct tty_state *s;
-    static int  instance_id = 0;
+    //static int  instance_id = 0;
 
     s = qemu_mallocz(sizeof(*s));
     s->dev.name = "goldfish_tty";

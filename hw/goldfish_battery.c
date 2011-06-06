@@ -59,7 +59,7 @@ QFIELD_BEGIN(goldfish_battery_fields)
     QFIELD_INT32(present),
     QFIELD_INT32(capacity),
 QFIELD_END
-
+/*
 static void  goldfish_battery_save(QEMUFile*  f, void* opaque)
 {
     struct goldfish_battery_state*  s = opaque;
@@ -76,7 +76,7 @@ static int   goldfish_battery_load(QEMUFile*  f, void*  opaque, int  version_id)
 
     return qemu_get_struct(f, goldfish_battery_fields, s);
 }
-
+*/
 static struct goldfish_battery_state *battery_state;
 
 static uint32_t goldfish_battery_read(void *opaque, target_phys_addr_t offset)

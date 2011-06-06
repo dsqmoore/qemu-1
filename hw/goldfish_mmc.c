@@ -102,7 +102,7 @@ QFIELD_BEGIN(goldfish_mmc_fields)
     QFIELD_INT32(block_count),
     QFIELD_INT32(is_SDHC),
 QFIELD_END
-
+/*
 static void  goldfish_mmc_save(QEMUFile*  f, void*  opaque)
 {
     struct goldfish_mmc_state*  s = opaque;
@@ -119,7 +119,7 @@ static int  goldfish_mmc_load(QEMUFile*  f, void*  opaque, int  version_id)
 
     return qemu_get_struct(f, goldfish_mmc_fields, s);
 }
-
+*/
 struct mmc_opcode {
     const char* name;
     int cmd;

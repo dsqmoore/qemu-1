@@ -41,7 +41,7 @@ QFIELD_BEGIN(goldfish_int_fields)
     QFIELD_INT32(irq_enabled),
     QFIELD_INT32(fiq_enabled),
 QFIELD_END
-
+/*
 static void goldfish_int_save(QEMUFile*  f, void*  opaque)
 {
     struct goldfish_int_state*  s = opaque;
@@ -58,7 +58,7 @@ static int  goldfish_int_load(QEMUFile*  f, void*  opaque, int  version_id)
 
     return qemu_get_struct(f, goldfish_int_fields, s);
 }
-
+*/
 static void goldfish_int_update(struct goldfish_int_state *s)
 {
     uint32_t flags;

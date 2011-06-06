@@ -35,7 +35,7 @@ struct switch_state {
 };
 
 #define  GOLDFISH_SWITCH_SAVE_VERSION  1
-
+/*
 static void  goldfish_switch_save(QEMUFile*  f, void*  opaque)
 {
     struct switch_state*  s = opaque;
@@ -58,7 +58,7 @@ static int  goldfish_switch_load(QEMUFile*  f, void*  opaque, int  version_id)
 
     return 0;
 }
-
+*/
 static uint32_t goldfish_switch_read(void *opaque, target_phys_addr_t offset)
 {
     struct switch_state *s = (struct switch_state *)opaque;

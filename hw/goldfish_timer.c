@@ -35,13 +35,13 @@ struct timer_state {
 };
 
 #define  GOLDFISH_TIMER_SAVE_VERSION  1
-
+/*
 static void  goldfish_timer_save(QEMUFile*  f, void*  opaque)
 {
     struct timer_state*  s   = opaque;
 
-    qemu_put_be64(f, s->now_ns);  /* in case the kernel is in the middle of a timer read */
-    qemu_put_byte(f, s->armed);
+    qemu_put_be64(f, s->now_ns); */ /* in case the kernel is in the middle of a timer read */
+ /*   qemu_put_byte(f, s->armed);
     if (s->armed) {
         int64_t  now_ns   = qemu_get_clock_ns(vm_clock);
         int64_t  alarm_ns = (s->alarm_low_ns | (int64_t)s->alarm_high_ns << 32);
@@ -72,7 +72,7 @@ static int  goldfish_timer_load(QEMUFile*  f, void*  opaque, int  version_id)
     }
     return 0;
 }
-
+*/
 static uint32_t goldfish_timer_read(void *opaque, target_phys_addr_t offset)
 {
     struct timer_state *s = (struct timer_state *)opaque;
@@ -137,7 +137,7 @@ struct rtc_state {
 /* we save the RTC for the case where the kernel is in the middle of a rtc_read
  * (i.e. it has read the low 32-bit of s->now, but not the high 32-bits yet */
 #define  GOLDFISH_RTC_SAVE_VERSION  1
-
+/*
 static void  goldfish_rtc_save(QEMUFile*  f, void*  opaque)
 {
     struct rtc_state*  s = opaque;
@@ -152,11 +152,11 @@ static int  goldfish_rtc_load(QEMUFile*  f, void*  opaque, int  version_id)
     if (version_id != GOLDFISH_RTC_SAVE_VERSION)
         return -1;
 
-    /* this is an old value that is not correct. but that's ok anyway */
-    s->now = qemu_get_be64(f);
+*/    /* this is an old value that is not correct. but that's ok anyway */
+/*    s->now = qemu_get_be64(f);
     return 0;
 }
-
+*/
 static uint32_t goldfish_rtc_read(void *opaque, target_phys_addr_t offset)
 {
     struct rtc_state *s = (struct rtc_state *)opaque;
