@@ -141,17 +141,21 @@ void goldfish_switch_set_state(void *opaque, uint32_t state)
         goldfish_device_set_irq(&s->dev, 0, 1);
 }
 
-void *goldfish_switch_add(char *name, uint32_t (*writefn)(void *opaque, uint32_t state), void *writeopaque, int id)
+void *goldfish_switch_add(const char *name, uint32_t (*writefn)(void *opaque, uint32_t state), void *writeopaque, int id)
 {
     int ret;
     struct switch_state *s;
+    char *n;
+
+    n = qemu_mallocz(strlen(name));
+    n = pstrcat(n, strlen(name), name);
 
     s = qemu_mallocz(sizeof(*s));
     s->dev.name = "goldfish-switch";
     s->dev.id = id;
     s->dev.size = 0x1000;
     s->dev.irq_count = 1;
-    s->name = name;
+    s->name = n;
     s->writefn = writefn;
     s->writeopaque = writeopaque;
 

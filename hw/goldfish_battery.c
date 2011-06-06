@@ -143,7 +143,7 @@ static CPUWriteMemoryFunc *goldfish_battery_writefn[] = {
     goldfish_battery_write
 };
 
-void goldfish_battery_init()
+void goldfish_battery_init(void)
 {
     struct goldfish_battery_state *s;
 

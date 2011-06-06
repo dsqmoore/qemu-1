@@ -33,8 +33,6 @@
 
 char* audio_input_source = NULL;
 
-void goldfish_memlog_init(uint32_t base);
-
 static struct goldfish_device event0_device = {
     .name = "goldfish_events",
     .id = 0,
@@ -55,7 +53,6 @@ static struct arm_boot_info info = {
     .board_id = 1441,
 };
 
-#define TEST_SWITCH 1
 #if TEST_SWITCH
 uint32_t switch_test_write(void *opaque, uint32_t state)
 {

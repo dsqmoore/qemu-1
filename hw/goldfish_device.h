@@ -48,13 +48,18 @@ void goldfish_battery_init(void);
 void goldfish_battery_set_prop(int ac, int property, int value);
 void goldfish_battery_display(void (* callback)(void *data, const char* string), void *data);
 void goldfish_mmc_init(uint32_t base, int id, BlockDriverState* bs);
-void *goldfish_switch_add(char *name, uint32_t (*writefn)(void *opaque, uint32_t state), void *writeopaque, int id);
+void *goldfish_switch_add(const char *name, uint32_t (*writefn)(void *opaque, uint32_t state), void *writeopaque, int id);
 void goldfish_switch_set_state(void *opaque, uint32_t state);
+void goldfish_memlog_init(uint32_t base);
 
 // these do not add a device
 void trace_dev_init(void);
 void events_dev_init(uint32_t base, qemu_irq irq);
 void nand_dev_init(uint32_t base);
 
+#define TEST_SWITCH 1
+#if TEST_SWITCH
+uint32_t switch_test_write(void *opaque, uint32_t state);
+#endif
 
 #endif
