@@ -39,13 +39,13 @@ static struct goldfish_device event0_device = {
     .size = 0x1000,
     .irq_count = 1
 };
-
+/*
 static struct goldfish_device nand_device = {
     .name = "goldfish_nand",
     .id = 0,
     .size = 0x1000
 };
-
+*/
 /* Board init.  */
 
 static struct arm_boot_info info = {
