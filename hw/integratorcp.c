@@ -14,11 +14,6 @@
 #include "arm-misc.h"
 #include "net.h"
 
-#include "qemu-common.h"
-#include "goldfish_device.h"
-#include "sysemu.h"
-#include "blockdev.h"
-
 typedef struct {
     SysBusDevice busdev;
     uint32_t memsz;
@@ -455,14 +450,6 @@ static struct arm_boot_info integrator_binfo = {
     .board_id = 0x113,
 };
 
-#define TEST_SWITCH 0
-#if TEST_SWITCH
-uint32_t switch_test_write(void *opaque, uint32_t state)
-{
-    goldfish_switch_set_state(opaque, state);
-    return state;
-}
-#endif
 static void integratorcp_init(ram_addr_t ram_size,
                      const char *boot_device,
                      const char *kernel_filename, const char *kernel_cmdline,
@@ -496,30 +483,6 @@ static void integratorcp_init(ram_addr_t ram_size,
     sysbus_mmio_map((SysBusDevice *)dev, 0, 0x10000000);
 
     cpu_pic = arm_pic_init_cpu(env);
-
-    qemu_irq *goldfish_pic;
-    goldfish_pic = goldfish_interrupt_init(0xff000000, cpu_pic[ARM_PIC_CPU_IRQ], cpu_pic[ARM_PIC_CPU_FIQ]);
-    goldfish_device_init(goldfish_pic, 0xff010000, 0x7f0000, 10, 22);
-    goldfish_device_bus_init(0xff001000, 1);
-    goldfish_timer_and_rtc_init(0xff003000, 3);
-    goldfish_tty_add(serial_hds[0], 0, 0xff002000, 4);
-    goldfish_memlog_init(0xff006000);
-    {
-        DriveInfo* info = drive_get( IF_IDE, 0, 0 );
-        if (info != NULL) {
-            goldfish_mmc_init(0xff005000, 0, info->bdrv);
-        }
-    }
-    goldfish_battery_init();
-#if TEST_SWITCH
-    {
-        void *sw;
-        sw = goldfish_switch_add("test", NULL, NULL, 0);
-        goldfish_switch_set_state(sw, 1);
-        goldfish_switch_add("test2", switch_test_write, sw, 1);
-    }
-#endif
-
     dev = sysbus_create_varargs("integrator_pic", 0x14000000,
                                 cpu_pic[ARM_PIC_CPU_IRQ],
                                 cpu_pic[ARM_PIC_CPU_FIQ], NULL);
