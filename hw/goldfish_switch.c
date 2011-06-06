@@ -147,8 +147,8 @@ void *goldfish_switch_add(const char *name, uint32_t (*writefn)(void *opaque, ui
     struct switch_state *s;
     char *n;
 
-    n = qemu_mallocz(strlen(name));
-    n = pstrcat(n, strlen(name), name);
+    n = qemu_mallocz(strlen(name) + 1);
+    n = pstrcat(n, strlen(name) + 1, name);
 
     s = qemu_mallocz(sizeof(*s));
     s->dev.name = "goldfish-switch";
