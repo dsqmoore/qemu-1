@@ -368,6 +368,7 @@ obj-arm-y += collie.o
 obj-arm-y += goldfish_tty.o goldfish_device.o goldfish_interrupt.o
 obj-arm-y += goldfish_memlog.o goldfish_mmc.o goldfish_timer.o
 obj-arm-y += goldfish_switch.o goldfish_battery.o android_arm.o
+obj-arm-y += goldfish_pipe.o
 obj-arm-y += goldfish_nand.o ../android/utils/debug.o
 obj-arm-y += ../android/utils/tempfile.o ../android/utils/bufprint.o
 obj-arm-y += ../android/utils/path.o ../android/utils/system.o
