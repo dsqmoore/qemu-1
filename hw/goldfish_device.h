@@ -51,6 +51,7 @@ void goldfish_mmc_init(uint32_t base, int id, BlockDriverState* bs);
 void *goldfish_switch_add(const char *name, uint32_t (*writefn)(void *opaque, uint32_t state), void *writeopaque, int id);
 void goldfish_switch_set_state(void *opaque, uint32_t state);
 void goldfish_memlog_init(uint32_t base);
+void nand_add_dev(const char *arg);
 
 // these do not add a device
 void trace_dev_init(void);
