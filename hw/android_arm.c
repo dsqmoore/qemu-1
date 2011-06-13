@@ -39,13 +39,13 @@ static struct goldfish_device event0_device = {
     .size = 0x1000,
     .irq_count = 1
 };
-/*
+
 static struct goldfish_device nand_device = {
     .name = "goldfish_nand",
     .id = 0,
     .size = 0x1000
 };
-*/
+
 /* Board init.  */
 
 static struct arm_boot_info info = {
@@ -119,7 +119,7 @@ static void android_arm_init_(ram_addr_t ram_size,
         }
     }
 
-    //goldfish_fb_init(0);
+    goldfish_fb_init(0);
 #ifdef HAS_AUDIO
     //goldfish_audio_init(0xff004000, 0, audio_input_source);
 #endif
@@ -137,8 +137,13 @@ static void android_arm_init_(ram_addr_t ram_size,
 
     goldfish_add_device_no_io(&event0_device);
     events_dev_init(event0_device.base, goldfish_pic[event0_device.irq]);
-
+#ifndef CONFIG_NAND
+#define CONFIG_NAND
+#endif
 #ifdef CONFIG_NAND
+    nand_add_dev("system,size=0x7100000,initfile=/home/patty/android_working/out/host/linux-x86/bin/../platforms/android-12/images/system.img");
+    nand_add_dev("userdata,size=0x4200000,file=/home/patty/android_working/out/host/linux-x86/bin/../platforms/android-12/images/userdata.img");
+    nand_add_dev("cache,size=0x4200000");
     goldfish_add_device_no_io(&nand_device);
     nand_dev_init(nand_device.base);
 #endif
