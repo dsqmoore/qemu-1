@@ -16,6 +16,7 @@
 #include "irq.h"
 #include "user-events.h"
 #include "console.h"
+#include "goldfish_device.h"
 
 #define MAX_EVENTS 256*4
 
@@ -84,7 +85,7 @@ QFIELD_BEGIN(events_state_fields)
     QFIELD_INT32(last),
     QFIELD_INT32(state),
 QFIELD_END
-
+/*
 static void  events_state_save(QEMUFile*  f, void*  opaque)
 {
     events_state*  s = opaque;
@@ -101,7 +102,7 @@ static int  events_state_load(QEMUFile*  f, void* opaque, int  version_id)
 
     return qemu_get_struct(f, events_state_fields, s);
 }
-
+*/
 extern const char*  android_skin_keycharmap;
 
 static void enqueue_event(events_state *s, unsigned int type, unsigned int code, int value)
@@ -327,7 +328,7 @@ events_set_bit(events_state* s, int  type, int  bit)
 {
     events_set_bits(s, type, bit, bit);
 }
-
+/*
 static void
 events_clr_bit(events_state* s, int type, int bit)
 {
@@ -338,7 +339,7 @@ events_clr_bit(events_state* s, int type, int bit)
         bits[ii] &= ~mask;
     }
 }
-
+*/
 void events_dev_init(uint32_t base, qemu_irq irq)
 {
     events_state *s;
@@ -521,6 +522,6 @@ void events_dev_init(uint32_t base, qemu_irq irq)
     user_event_register_generic(s, events_put_generic);
 
     //    TODO: uncomment
-//    register_savevm( "events_state", 0, EVENTS_STATE_SAVE_VERSION,
+//    register_savevm( NULL, "events_state", 0, EVENTS_STATE_SAVE_VERSION,
 //                      events_state_save, events_state_load, s );
 }
