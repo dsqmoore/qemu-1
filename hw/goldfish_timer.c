@@ -175,11 +175,11 @@ static uint32_t goldfish_rtc_read(void *opaque, target_phys_addr_t offset)
 static void goldfish_rtc_write(void *opaque, target_phys_addr_t offset, uint32_t value)
 {
     struct rtc_state *s = (struct rtc_state *)opaque;
-    int64_t alarm;
+    //int64_t alarm;
     switch(offset) {
         case 0x8:
             s->alarm_low = value;
-            alarm = s->alarm_low | (int64_t)s->alarm_high << 32;
+            //alarm = s->alarm_low | (int64_t)s->alarm_high << 32;
             //printf("next alarm at %lld, tps %lld\n", alarm, ticks_per_sec);
             //qemu_mod_timer(s->timer, alarm);
             break;
