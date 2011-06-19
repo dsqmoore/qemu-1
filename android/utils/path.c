@@ -583,8 +583,6 @@ path_search_exec( const char* filename )
 {
     const char* sysPath = getenv("PATH");
     char        temp[PATH_MAX];
-    int         count;
-    int         slen;
     const char* p;
 
     /* If the file contains a directory separator, don't search */
@@ -609,8 +607,6 @@ path_search_exec( const char* filename )
      * Items are separated by DIR_SEP, and two successive separators
      * correspond to an empty item that will be ignored.
      * Also compute the required string storage length. */
-    count   = 0;
-    slen    = 0;
     p       = sysPath;
 
     while (*p) {
