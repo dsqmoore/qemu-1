@@ -1707,3 +1707,28 @@ PixelFormat qemu_default_pixelformat(int bpp)
     }
     return pf;
 }
+
+void
+android_display_reset(DisplayState* ds, int width, int height, int bitspp)
+{
+    DisplaySurface*  surface;
+    int              bytespp = (bitspp+7)/8;
+    int              pitch = (bytespp*width + 3) & ~3;
+
+    qemu_free_displaysurface(ds);
+
+    surface = (DisplaySurface*) qemu_mallocz(sizeof(DisplaySurface));
+
+    surface->width = width;
+    surface->height = height;
+    surface->linesize = pitch;
+    surface->pf = qemu_default_pixelformat(bitspp);
+    surface->data = (uint8_t*) qemu_malloc(surface->linesize * surface->height);
+#ifdef HOST_WORDS_BIGENDIAN
+    surface->flags = QEMU_ALLOCATED_FLAG | QEMU_BIG_ENDIAN_FLAG;
+#else
+    surface->flags = QEMU_ALLOCATED_FLAG;
+#endif
+
+    ds->surface = surface;
+}

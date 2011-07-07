@@ -3177,6 +3177,8 @@ int main(int argc, char **argv, char **envp)
     /* just use the first displaystate for the moment */
     ds = get_displaystate();
 
+    android_display_reset(ds, 640, 480, 16);
+
     if (using_spice)
         display_remote++;
     if (display_type == DT_DEFAULT && !display_remote) {
