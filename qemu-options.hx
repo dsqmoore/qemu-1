@@ -2380,6 +2380,15 @@ Specify a trace file to log output traces to.
 ETEXI
 #endif
 
+DEF("pixel-format", HAS_ARG, QEMU_OPTION_pixel_format,
+    "-pixel-format bpp\n"
+    "                change default bits per pixel\n", QEMU_ARCH_ALL)
+STEXI
+@item -pixel-format @var{bpp}
+@findex -pixel-format
+Change the default bits per pixel.
+ETEXI
+
 HXCOMM This is the last statement. Insert new options before this line!
 STEXI
 @end table
