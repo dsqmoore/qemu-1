@@ -402,5 +402,4 @@ static inline void do_info_vnc_print(Monitor *mon, const QObject *data)
 /* curses.c */
 void curses_display_init(DisplayState *ds, int full_screen);
 
-void android_display_reset(DisplayState* ds, int width, int height, int bitspp);
 #endif
