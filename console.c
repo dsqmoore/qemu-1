@@ -159,7 +159,6 @@ static DisplayState *display_state;
 static TextConsole *active_console;
 static TextConsole *consoles[MAX_CONSOLES];
 static int nb_consoles = 0;
-int default_pixelbpp = 32;
 
 void vga_hw_update(void)
 {
@@ -1279,20 +1278,18 @@ static DisplaySurface* defaultallocator_create_displaysurface(int width, int hei
 {
     DisplaySurface *surface = (DisplaySurface*) qemu_mallocz(sizeof(DisplaySurface));
 
-    int bytespp = (default_pixelbpp+7)/8;
-    int linesize = (bytespp*width + 3) & ~3;
+    int linesize = width * 4;
     qemu_alloc_display(surface, width, height, linesize,
-                       qemu_default_pixelformat(default_pixelbpp), 0);
+                       qemu_default_pixelformat(32), 0);
     return surface;
 }
 
 static DisplaySurface* defaultallocator_resize_displaysurface(DisplaySurface *surface,
                                           int width, int height)
 {
-    int bytespp = (default_pixelbpp+7)/8;
-    int linesize = (bytespp*width + 3) & ~3;
+    int linesize = width * 4;
     qemu_alloc_display(surface, width, height, linesize,
-                       qemu_default_pixelformat(default_pixelbpp), 0);
+                       qemu_default_pixelformat(32), 0);
     return surface;
 }
 

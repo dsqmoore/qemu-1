@@ -62,7 +62,6 @@ static uint8_t allocator;
 static SDL_PixelFormat host_format;
 static int scaling_active = 0;
 static Notifier mouse_mode_notifier;
-extern int default_pixelbpp;
 
 static void sdl_update(DisplayState *ds, int x, int y, int w, int h)
 {
@@ -195,7 +194,7 @@ static DisplaySurface* sdl_create_displaysurface(int width, int height)
     if (host_format.BitsPerPixel == 16)
         do_sdl_resize(width, height, 16);
     else
-        do_sdl_resize(width, height, default_pixelbpp);
+        do_sdl_resize(width, height, 32);
 
     surface->pf = sdl_to_qemu_pixelformat(real_screen->format);
     surface->linesize = real_screen->pitch;
