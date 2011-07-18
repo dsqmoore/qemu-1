@@ -291,8 +291,6 @@ static struct {
     { .driver = "vmware-svga",          .flag = &default_vga       },
 };
 
-extern int default_pixelbpp;
-
 static int default_driver_check(QemuOpts *opts, void *opaque)
 {
     const char *driver = qemu_opt_get(opts, "driver");
@@ -2895,8 +2893,6 @@ int main(int argc, char **argv, char **envp)
                     fclose(fp);
                     break;
                 }
-            case QEMU_OPTION_pixel_format:
-                default_pixelbpp = atoi(optarg);
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
