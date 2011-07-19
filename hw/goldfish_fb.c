@@ -221,6 +221,18 @@ pixels_to_mm(int  pixels, int dpi)
     return (int)(0.5 + 25.4 * pixels  / dpi);
 }
 
+static uint32_t convert_pix(uint32_t rgb, struct PixelFormat* pf_out, struct PixelFormat* pf_in)
+{
+    // Pixel conversion
+    uint8_t red   = (rgb & pf_in->rmask) >> pf_in->rshift;
+    uint8_t green = (rgb & pf_in->gmask) >> pf_in->gshift;
+    uint8_t blue  = (rgb & pf_in->bmask) >> pf_in->bshift;
+    red   <<= pf_out->rbits - pf_in->rbits;
+    green <<= pf_out->gbits - pf_in->gbits;
+    blue  <<= pf_out->bbits - pf_in->bbits;
+    return (blue << pf_out->bshift) | (green << pf_out->gshift) | (red << pf_out->rshift);
+}
+
 
 #define  STATS  0
 
@@ -242,8 +254,10 @@ typedef struct {
     int            bytes_per_pixel;
     const uint8_t* src_pixels;
     int            src_pitch;
+    PixelFormat*   src_format;
     uint8_t*       dst_pixels;
     int            dst_pitch;
+    PixelFormat*   dst_format;
 } FbUpdateState;
 
 /* This structure is used to hold the outputs for
@@ -306,6 +320,90 @@ compute_fb_update_rect_linear(FbUpdateState*  fbs,
             if (!dirty) { /* this line was not modified, skip to next one */
                 goto NEXT_LINE;
             }
+        }
+
+        if (fbs->src_format->bytes_per_pixel != fbs->dst_format->bytes_per_pixel) {
+            if (fbs->src_format->bytes_per_pixel == 2) {
+                const uint16_t* src = (const uint16_t*) src_line;
+                uint32_t*       dst = (uint32_t*) dst_line;
+
+                xx1 = 0;
+                DUFF4(width, {
+                    if (convert_pix(src[xx1], fbs->dst_format, fbs->src_format) != dst[xx1]) {
+                        break;
+                    }
+                    xx1++;
+                });
+                if (xx1 == width) {
+                    goto NEXT_LINE;
+                }
+                xx2 = width-1;
+                DUFF4(xx2-xx1,{
+                    if (convert_pix(src[xx2], fbs->dst_format, fbs->src_format) != dst[xx2]) {
+                        break;
+                    }
+                    xx2--;
+                });
+#ifdef HOST_WORDS_BIGENDIAN
+                /* Convert the guest little-endian pixels into big-endian ones */
+                int xx = xx1;
+                DUFF4(xx2-xx1+1,{
+                    uint32_t   spix = convert_pix(src[xx], fbs->dst_format, fbs->src_format);
+                    spix = (spix << 16) | (spix >> 16);
+                    spix = ((spix << 8) & 0xff00ff00) | ((spix >> 8) & 0x00ff00ff);
+                    dst[xx] = spix;
+                    xx++;
+                })
+#else
+                int xx;
+                for (xx=xx1; xx <= xx2; xx++) {
+                    dst[xx] = convert_pix(src[xx], fbs->dst_format, fbs->src_format);
+                }
+#endif
+            }
+            else {
+                const uint32_t* src = (const uint32_t*) src_line;
+                uint16_t*       dst = (uint16_t*) dst_line;
+
+                xx1 = 0;
+                DUFF4(width, {
+                    if (convert_pix(src[xx1], fbs->dst_format, fbs->src_format) != dst[xx1]) {
+                        break;
+                    }
+                    xx1++;
+                });
+                if (xx1 == width) {
+                    goto NEXT_LINE;
+                }
+                xx2 = width-1;
+                DUFF4(xx2-xx1,{
+                    if (convert_pix(src[xx2], fbs->dst_format, fbs->src_format) != dst[xx2]) {
+                        break;
+                    }
+                    xx2--;
+                });
+#ifdef HOST_WORDS_BIGENDIAN
+                /* Convert the guest little-endian pixels into big-endian ones */
+                int xx = xx1;
+                DUFF4(xx2-xx1+1,{
+                    uint32_t   spix = convert_pix(src[xx], fbs->dst_format, fbs->src_format);
+                    dst[xx] = (uint16_t)((spix << 8) | (spix >> 8));
+                    xx++;
+                });
+#else
+                int xx;
+                for (xx=xx1; xx <= xx2; xx++) {
+                    dst[xx] = convert_pix(src[xx], fbs->dst_format, fbs->src_format);
+                }
+#endif
+            }
+            if (xx1 < width) {
+                if (xx1 < rect->xmin) rect->xmin = xx1;
+                if (xx2 > rect->xmax) rect->xmax = xx2;
+                if (yy < rect->ymin) rect->ymin = yy;
+                if (yy > rect->ymax) rect->ymax = yy;
+            }
+            goto NEXT_LINE;
         }
 
         /* Then compute actual bounds of the changed pixels, while
@@ -482,10 +580,15 @@ static void goldfish_fb_update_display(void *opaque)
     fbs.height     = height;
     fbs.dst_pixels = dst_line;
     fbs.dst_pitch  = pitch;
+    fbs.dst_format = &s->ds->surface->pf;
     fbs.bytes_per_pixel = goldfish_fb_get_bytes_per_pixel(s);
 
     fbs.src_pixels = src_line;
-    fbs.src_pitch  = width*s->ds->surface->pf.bytes_per_pixel;
+    //fbs.src_pitch  = width*s->ds->surface->pf.bytes_per_pixel;
+    /* the kernel only works with RGB 565 at this time */
+    PixelFormat rgb_565_pf = qemu_default_pixelformat(16);
+    fbs.src_pitch  = width * rgb_565_pf.bytes_per_pixel;
+    fbs.src_format = &rgb_565_pf;
 
 
 #if STATS
