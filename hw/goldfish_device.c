@@ -269,7 +269,6 @@ static int goldfish_busdev_init(DeviceState *qdev, DeviceInfo *qinfo)
 {
     GoldfishDeviceInfo *info = (GoldfishDeviceInfo *)qinfo;
     GoldfishDevice *dev = DO_UPCAST(GoldfishDevice, qdev, qdev);
-    goldfish_device_add(dev, info->readfn, info->writefn, dev);
 /*    char *id;
 
     if (asprintf(&id, "%s@%x", info->dt_name, dev->reg) < 0) {
@@ -278,7 +277,11 @@ static int goldfish_busdev_init(DeviceState *qdev, DeviceInfo *qinfo)
 
     dev->qdev.id = id;
 */
-    return info->init(dev);
+    int ret = info->init(dev);
+    if (ret == 0) {
+        goldfish_device_add(dev, info->readfn, info->writefn, dev);
+    }
+    return ret;
 }
 
 void goldfish_bus_register_withprop(GoldfishDeviceInfo *info)
