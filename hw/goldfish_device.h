@@ -33,7 +33,7 @@ typedef struct GoldfishDevice {
     DeviceState qdev;
     struct GoldfishDevice *next;
     uint32_t reported_state;
-    const char *name;
+    char *name;
     uint32_t base;
     uint32_t id;
     uint32_t size;
@@ -59,7 +59,7 @@ typedef struct GoldfishBus {
 } GoldfishBus;
 
 void goldfish_bus_register_withprop(GoldfishDeviceInfo *info);
-GoldfishBus *goldfish_bus_init(void);
+GoldfishBus *goldfish_bus_init(uint32_t base, uint32_t irq);
 
 static inline DeviceState *goldfish_bus_create(GoldfishBus *gbus, uint32_t base, int irq)
 {

@@ -213,8 +213,10 @@ static int goldfish_timer_init(GoldfishDevice *dev)
 DeviceState *goldfish_timer_create(GoldfishBus *gbus, uint32_t base, int irq)
 {
     DeviceState *dev;
+    char *name = (char *)"goldfish-timer";
 
-    dev = qdev_create(&gbus->bus, "goldfish-timer");
+    dev = qdev_create(&gbus->bus, name);
+    qdev_prop_set_string(dev, "name", name);
     qdev_prop_set_uint32(dev, "base", base);
     qdev_prop_set_uint32(dev, "irq", irq);
     qdev_prop_set_uint32(dev, "id", -1);
@@ -237,6 +239,7 @@ static GoldfishDeviceInfo goldfish_timer_info = {
         DEFINE_PROP_UINT32("id", GoldfishDevice, id, -1),
         DEFINE_PROP_UINT32("size", GoldfishDevice, size, 0x1000),
         DEFINE_PROP_UINT32("irq_count", GoldfishDevice, irq_count, 1),
+        DEFINE_PROP_STRING("name", GoldfishDevice, name),
         DEFINE_PROP_END_OF_LIST(),
     },
 };
@@ -258,8 +261,10 @@ static int goldfish_rtc_init(GoldfishDevice *dev)
 DeviceState *goldfish_rtc_create(GoldfishBus *gbus)
 {
     DeviceState *dev;
+    char *name = (char *)"goldfish-rtc";
 
-    dev = qdev_create(&gbus->bus, "goldfish-rtc");
+    dev = qdev_create(&gbus->bus, name);
+    qdev_prop_set_string(dev, "name", name);
     qdev_prop_set_uint32(dev, "id", -1);
     qdev_prop_set_uint32(dev, "size", 0x1000);
     qdev_prop_set_uint32(dev, "irq_count", 1);
@@ -278,6 +283,7 @@ static GoldfishDeviceInfo goldfish_rtc_info = {
         DEFINE_PROP_UINT32("id", GoldfishDevice, id, -1),
         DEFINE_PROP_UINT32("size", GoldfishDevice, size, 0x1000),
         DEFINE_PROP_UINT32("irq_count", GoldfishDevice, irq_count, 1),
+        DEFINE_PROP_STRING("name", GoldfishDevice, name),
         DEFINE_PROP_END_OF_LIST(),
     },
 };

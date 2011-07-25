@@ -232,8 +232,10 @@ static int goldfish_device_bus_init(GoldfishDevice *dev)
 DeviceState *goldfish_device_bus_create(GoldfishBus *gbus, uint32_t base, uint32_t irq)
 {
     DeviceState *dev;
+    char *name = (char *)"goldfish-device-bus";
 
-    dev = qdev_create(&gbus->bus, "goldfish-device-bus");
+    dev = qdev_create(&gbus->bus, name);
+    qdev_prop_set_string(dev, "name", name);
     qdev_prop_set_uint32(dev, "base", base);
     qdev_prop_set_uint32(dev, "irq", irq);
     qdev_init_nofail(dev);
@@ -253,6 +255,7 @@ static GoldfishDeviceInfo goldfish_device_bus_info = {
         DEFINE_PROP_UINT32("size", GoldfishDevice, size, 0x1000),
         DEFINE_PROP_UINT32("irq", GoldfishDevice, irq, 1),
         DEFINE_PROP_UINT32("irq_count", GoldfishDevice, irq_count, 1),
+        DEFINE_PROP_STRING("name", GoldfishDevice, name),
         DEFINE_PROP_END_OF_LIST(),
     },
 };
@@ -260,13 +263,12 @@ static GoldfishDeviceInfo goldfish_device_bus_info = {
 static void goldfish_device_bus_register(void)
 {
     goldfish_bus_register_withprop(&goldfish_device_bus_info);
-}
-device_init(goldfish_device_bus_register);
+} device_init(goldfish_device_bus_register);
 
 static int goldfish_busdev_init(DeviceState *qdev, DeviceInfo *qinfo)
 {
     GoldfishDeviceInfo *info = (GoldfishDeviceInfo *)qinfo;
-    GoldfishDevice *dev = (GoldfishDevice *)qdev;
+    GoldfishDevice *dev = DO_UPCAST(GoldfishDevice, qdev, qdev);
     goldfish_device_add(dev, info->readfn, info->writefn, dev);
 /*    char *id;
 
@@ -288,7 +290,7 @@ void goldfish_bus_register_withprop(GoldfishDeviceInfo *info)
     qdev_register(&info->qdev);
 }
 
-GoldfishBus *goldfish_bus_init(void)
+GoldfishBus *goldfish_bus_init(uint32_t base, uint32_t irq)
 {
     GoldfishBus *bus;
     BusState *qbus;
@@ -304,40 +306,11 @@ GoldfishBus *goldfish_bus_init(void)
     qbus = qbus_create(&goldfish_bus_info, dev, "goldfish-bus");
     bus = DO_UPCAST(GoldfishBus, bus, qbus);
 
-    /* Init callbacks */
-    //goldfish_device_add(, goldfish_bus_readfn, goldfish_bus_writefn, );
+    dev = goldfish_device_bus_create(bus, base, irq);
+    GoldfishDevice *gdev = DO_UPCAST(GoldfishDevice, qdev, dev);
+    bus->dev = *gdev;
 
-    /* hcall-vio */
-    //spapr_register_hypercall(H_VIO_SIGNAL, h_vio_signal);
-
-    /* hcall-tce */
-    //spapr_register_hypercall(H_PUT_TCE, h_put_tce);
-
-    /* hcall-crq */
-    /*spapr_register_hypercall(H_REG_CRQ, h_reg_crq);
-    spapr_register_hypercall(H_FREE_CRQ, h_free_crq);
-    spapr_register_hypercall(H_SEND_CRQ, h_send_crq);
-    spapr_register_hypercall(H_ENABLE_CRQ, h_enable_crq);
-    */
-
-    /* RTAS calls */
-    //spapr_rtas_register("ibm,set-tce-bypass", rtas_set_tce_bypass);
-    //spapr_rtas_register("quiesce", rtas_quiesce);
-
-    // initialize each existing device with the new bus
-    /*
-    for (qinfo = device_info_list; qinfo; qinfo = qinfo->next) {
-        GoldfishDeviceInfo *info = (GoldfishDeviceInfo *)qinfo;
-
-        if (qinfo->bus_info != &goldfish_bus_info) {
-            continue;
-        }
-
-        if (info->hcalls) {
-            info->hcalls(bus);
-        }
-    }
-    */
+    goldfish_device_add(&bus->dev, goldfish_device_bus_readfn, goldfish_device_bus_writefn, bus);
 
     return bus;
 }

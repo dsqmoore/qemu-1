@@ -224,8 +224,10 @@ static int goldfish_tty_init(GoldfishDevice *dev)
 DeviceState *goldfish_tty_create(GoldfishBus *gbus, CharDriverState *cs, int id, uint32_t base, int irq)
 {
     DeviceState *dev;
+    char *name = (char *)"goldfish-tty";
 
-    dev = qdev_create(&gbus->bus, "goldfish-tty");
+    dev = qdev_create(&gbus->bus, name);
+    qdev_prop_set_string(dev, "name", name);
     qdev_prop_set_uint32(dev, "id", id);
     qdev_prop_set_uint32(dev, "base", base);
     qdev_prop_set_uint32(dev, "size", 0x1000);
@@ -250,6 +252,7 @@ static GoldfishDeviceInfo goldfish_tty_info = {
         DEFINE_PROP_UINT32("irq", GoldfishDevice, irq, 0),
         DEFINE_PROP_UINT32("irq_count", GoldfishDevice, irq_count, 1),
         DEFINE_PROP_CHR("chardev", GoldfishTTYDevice, cs),
+        DEFINE_PROP_STRING("name", GoldfishDevice, name),
         DEFINE_PROP_END_OF_LIST(),
     },
 };
