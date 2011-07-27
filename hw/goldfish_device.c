@@ -226,7 +226,8 @@ static int goldfish_device_bus_init(GoldfishDevice *dev)
 {
     //GoldfishDeviceBusDevice *tdev = (GoldfishDeviceBusDevice *)dev;
 
-    return 0;
+    // Return non-zero value so that this dummy device is not registerd with the kernel
+    return 1;
 }
 
 DeviceState *goldfish_device_bus_create(GoldfishBus *gbus, uint32_t base, uint32_t irq)
