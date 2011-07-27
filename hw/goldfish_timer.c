@@ -25,17 +25,6 @@ enum {
     TIMER_CLEAR_ALARM       = 0x14
 };
 
-/*
-struct timer_state {
-    struct goldfish_device dev;
-    uint32_t alarm_low_ns;
-    int32_t alarm_high_ns;
-    int64_t now_ns;
-    int     armed;
-    QEMUTimer *timer;
-};
-*/
-
 typedef struct GoldfishTimerDevice {
     GoldfishDevice dev;
     uint32_t alarm_low_ns;
@@ -99,15 +88,6 @@ static void goldfish_timer_tick(void *opaque)
     goldfish_device_set_irq(&s->dev, 0, 1);
 }
 
-/*
-struct rtc_state {
-    struct goldfish_device dev;
-    uint32_t alarm_low;
-    int32_t alarm_high;
-    int64_t now;
-};
-*/
-
 typedef struct GoldfishRTCDevice {
     GoldfishDevice dev;
     uint32_t alarm_low;
@@ -133,11 +113,11 @@ static uint32_t goldfish_rtc_read(void *opaque, target_phys_addr_t offset)
 static void goldfish_rtc_write(void *opaque, target_phys_addr_t offset, uint32_t value)
 {
     GoldfishRTCDevice *s = (GoldfishRTCDevice *)opaque;
-    //int64_t alarm;
+    int64_t alarm;
     switch(offset) {
         case 0x8:
             s->alarm_low = value;
-            //alarm = s->alarm_low | (int64_t)s->alarm_high << 32;
+            alarm = s->alarm_low | (int64_t)s->alarm_high << 32;
             //printf("next alarm at %lld, tps %lld\n", alarm, ticks_per_sec);
             //qemu_mod_timer(s->timer, alarm);
             break;
@@ -152,26 +132,6 @@ static void goldfish_rtc_write(void *opaque, target_phys_addr_t offset, uint32_t
             cpu_abort (cpu_single_env, "goldfish_rtc_write: Bad offset %x\n", offset);
     }
 }
-
-/*
-static struct timer_state timer_state = {
-    .dev = {
-        .name = "goldfish_timer",
-        .id = -1,
-        .size = 0x1000,
-        .irq_count = 1,
-    }
-};
-
-static struct timer_state rtc_state = {
-    .dev = {
-        .name = "goldfish_rtc",
-        .id = -1,
-        .size = 0x1000,
-        .irq_count = 1,
-    }
-};
-*/
 
 static CPUReadMemoryFunc *goldfish_timer_readfn[] = {
     goldfish_timer_read,
@@ -199,13 +159,8 @@ static CPUWriteMemoryFunc *goldfish_rtc_writefn[] = {
 
 static int goldfish_timer_init(GoldfishDevice *dev)
 {
-    /*
-    timer_state.dev.base = timerbase;
-    timer_state.dev.irq = timerirq;
-    */
     GoldfishTimerDevice *tdev = (GoldfishTimerDevice *)dev;
     tdev->timer = qemu_new_timer_ns(vm_clock, goldfish_timer_tick, tdev);
-    //goldfish_device_add(&tdev->dev, goldfish_timer_readfn, goldfish_timer_writefn, tdev);
 
     return 0;
 }
@@ -252,9 +207,6 @@ device_init(goldfish_timer_register);
 
 static int goldfish_rtc_init(GoldfishDevice *dev)
 {
-    //GoldfishRTCDevice *rdev = (GoldfishRTCDevice *)dev;
-
-    //goldfish_device_add(&rdev->dev, goldfish_rtc_readfn, goldfish_rtc_writefn, dev);
     return 0;
 }
 

@@ -29,17 +29,7 @@ enum {
     TTY_CMD_WRITE_BUFFER   = 2,
     TTY_CMD_READ_BUFFER    = 3,
 };
-/*
-struct tty_state {
-    struct goldfish_device dev;
-    CharDriverState *cs;
-    uint32_t ptr;
-    uint32_t ptr_len;
-    uint32_t ready;
-    uint8_t data[128];
-    uint32_t data_count;
-};
-*/
+
 typedef struct GoldfishTTYDevice {
     GoldfishDevice dev;
     CharDriverState *cs;
@@ -185,32 +175,7 @@ static CPUWriteMemoryFunc *goldfish_tty_writefn[] = {
     goldfish_tty_write,
     goldfish_tty_write
 };
-/*
-int goldfish_tty_add(CharDriverState *cs, int id, uint32_t base, int irq)
-{
-    int ret;
-    struct tty_state *s;
 
-    s = qemu_mallocz(sizeof(*s));
-    s->dev.name = "goldfish_tty";
-    s->dev.id = id;
-    s->dev.base = base;
-    s->dev.size = 0x1000;
-    s->dev.irq = irq;
-    s->dev.irq_count = 1;
-    s->cs = cs;
-
-    if(cs) {
-        qemu_chr_add_handlers(cs, tty_can_receive, tty_receive, NULL, s);
-    }
-
-    ret = goldfish_device_add(&s->dev, goldfish_tty_readfn, goldfish_tty_writefn, s);
-    if(ret) {
-        qemu_free(s);
-    }
-    return ret;
-}
-*/
 static int goldfish_tty_init(GoldfishDevice *dev)
 {
     GoldfishTTYDevice *tdev = (GoldfishTTYDevice *)dev;

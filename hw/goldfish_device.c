@@ -37,13 +37,6 @@ static struct BusInfo goldfish_bus_info = {
     .size       = sizeof(GoldfishBus),
 };
 
-/*
-struct bus_state {
-    struct goldfish_device dev;
-    struct goldfish_device *current;
-};
-*/
-
 typedef struct GoldfishDeviceBusDevice {
     GoldfishDevice dev;
 } GoldfishDeviceBusDevice;
@@ -189,48 +182,20 @@ static CPUWriteMemoryFunc *goldfish_device_bus_writefn[] = {
     goldfish_device_bus_write
 };
 
-/*
-static struct bus_state bus_state = {
-    .dev = {
-        .name = "goldfish_device_bus",
-        .id = -1,
-        .base = 0x10001000,
-        .size = 0x1000,
-        .irq = 1,
-        .irq_count = 1,
-    }
-};
-
-void goldfish_device_init(qemu_irq *pic, uint32_t base, uint32_t size, uint32_t irq, uint32_t irq_count)
-{
-    goldfish_pic = pic;
-    goldfish_free_base = base;
-    goldfish_free_irq = irq;
-}
-
-int goldfish_device_bus_init(uint32_t base, uint32_t irq)
-{
-    bus_state.dev.base = base;
-    bus_state.dev.irq = irq;
-
-    return goldfish_device_add(&bus_state.dev, goldfish_bus_readfn, goldfish_bus_writefn, &bus_state);
-}
-*/
 void goldfish_device_init(qemu_irq *pic, uint32_t base, uint32_t irq)
 {
     goldfish_pic = pic;
     goldfish_free_base = base;
     goldfish_free_irq = irq;
 }
+
 static int goldfish_device_bus_init(GoldfishDevice *dev)
 {
-    //GoldfishDeviceBusDevice *tdev = (GoldfishDeviceBusDevice *)dev;
-
     // Return non-zero value so that this dummy device is not registerd with the kernel
     return 1;
 }
 
-DeviceState *goldfish_device_bus_create(GoldfishBus *gbus, uint32_t base, uint32_t irq)
+static DeviceState *goldfish_device_bus_create(GoldfishBus *gbus, uint32_t base, uint32_t irq)
 {
     DeviceState *dev;
     char *name = (char *)"goldfish_device_bus";
@@ -270,14 +235,6 @@ static int goldfish_busdev_init(DeviceState *qdev, DeviceInfo *qinfo)
 {
     GoldfishDeviceInfo *info = (GoldfishDeviceInfo *)qinfo;
     GoldfishDevice *dev = DO_UPCAST(GoldfishDevice, qdev, qdev);
-/*    char *id;
-
-    if (asprintf(&id, "%s@%x", info->dt_name, dev->reg) < 0) {
-        return -1;
-    }
-
-    dev->qdev.id = id;
-*/
     int ret = info->init(dev);
     if (ret == 0) {
         goldfish_device_add(dev, info->readfn, info->writefn, dev);
@@ -299,13 +256,9 @@ GoldfishBus *goldfish_bus_init(uint32_t base, uint32_t irq)
     GoldfishBus *bus;
     BusState *qbus;
     DeviceState *dev;
-    //DeviceInfo *qinfo;
 
-    /* Create bridge device */
     dev = qdev_create(NULL, "goldfish_bridge");
     qdev_init_nofail(dev);
-
-    /* Create bus on bridge device */
 
     qbus = qbus_create(&goldfish_bus_info, dev, "goldfish_bus");
     bus = DO_UPCAST(GoldfishBus, bus, qbus);
@@ -321,7 +274,6 @@ GoldfishBus *goldfish_bus_init(uint32_t base, uint32_t irq)
 
 static int goldfish_bridge_init(SysBusDevice *dev)
 {
-    /* nothing */
     return 0;
 }
 

@@ -21,17 +21,7 @@ enum {
     INTERRUPT_DISABLE       = 0x0c,
     INTERRUPT_ENABLE        = 0x10
 };
-/*
-struct goldfish_int_state {
-    struct goldfish_device dev;
-    uint32_t level;
-    uint32_t pending_count;
-    uint32_t irq_enabled;
-    uint32_t fiq_enabled;
-    qemu_irq parent_irq;
-    qemu_irq parent_fiq;
-};
-*/
+
 typedef struct GoldfishInterruptDevice {
     GoldfishDevice dev;
     uint32_t level;
@@ -141,32 +131,6 @@ static CPUWriteMemoryFunc *goldfish_int_writefn[] = {
     goldfish_int_write,
     goldfish_int_write
 };
-/*
-qemu_irq*  goldfish_interrupt_init(uint32_t base, qemu_irq parent_irq, qemu_irq parent_fiq)
-{
-    int ret;
-    struct goldfish_int_state *s;
-    qemu_irq*  qi;
-
-    s = qemu_mallocz(sizeof(*s));
-    qi = qemu_allocate_irqs(goldfish_int_set_irq, s, 32);
-    s->dev.name = "goldfish_interrupt_controller";
-    s->dev.id = -1;
-    s->dev.base = base;
-    s->dev.size = 0x1000;
-    s->parent_irq = parent_irq;
-    s->parent_fiq = parent_fiq;
-
-    ret = goldfish_device_add(&s->dev, goldfish_int_readfn, goldfish_int_writefn, s);
-    if(ret) {
-        qemu_free(s);
-        return NULL;
-    }
-
-    return qi;
-}
-
-*/
 
 static int goldfish_int_init(GoldfishDevice *dev)
 {
@@ -176,7 +140,6 @@ static int goldfish_int_init(GoldfishDevice *dev)
     qi = qemu_allocate_irqs(goldfish_int_set_irq, idev, 32);
     goldfish_device_init(qi, 0xff010000, 10);
 
-    //goldfish_device_add(&rdev->dev, goldfish_int_readfn, goldfish_int_writefn, dev);
     return 0;
 }
 
