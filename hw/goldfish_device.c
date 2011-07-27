@@ -33,7 +33,7 @@
 
 #include "hw/sysbus.h"
 static struct BusInfo goldfish_bus_info = {
-    .name       = "goldfish-bus",
+    .name       = "goldfish_bus",
     .size       = sizeof(GoldfishBus),
 };
 
@@ -233,7 +233,7 @@ static int goldfish_device_bus_init(GoldfishDevice *dev)
 DeviceState *goldfish_device_bus_create(GoldfishBus *gbus, uint32_t base, uint32_t irq)
 {
     DeviceState *dev;
-    char *name = (char *)"goldfish-device-bus";
+    char *name = (char *)"goldfish_device_bus";
 
     dev = qdev_create(&gbus->bus, name);
     qdev_prop_set_string(dev, "name", name);
@@ -248,7 +248,7 @@ static GoldfishDeviceInfo goldfish_device_bus_info = {
     .init = goldfish_device_bus_init,
     .readfn = goldfish_device_bus_readfn,
     .writefn = goldfish_device_bus_writefn,
-    .qdev.name  = "goldfish-device-bus",
+    .qdev.name  = "goldfish_device_bus",
     .qdev.size  = sizeof(GoldfishDeviceBusDevice),
     .qdev.props = (Property[]) {
         DEFINE_PROP_UINT32("base", GoldfishDevice, base, 0x10001000),
@@ -302,12 +302,12 @@ GoldfishBus *goldfish_bus_init(uint32_t base, uint32_t irq)
     //DeviceInfo *qinfo;
 
     /* Create bridge device */
-    dev = qdev_create(NULL, "goldfish-bridge");
+    dev = qdev_create(NULL, "goldfish_bridge");
     qdev_init_nofail(dev);
 
     /* Create bus on bridge device */
 
-    qbus = qbus_create(&goldfish_bus_info, dev, "goldfish-bus");
+    qbus = qbus_create(&goldfish_bus_info, dev, "goldfish_bus");
     bus = DO_UPCAST(GoldfishBus, bus, qbus);
 
     dev = goldfish_device_bus_create(bus, base, irq);
@@ -327,7 +327,7 @@ static int goldfish_bridge_init(SysBusDevice *dev)
 
 static SysBusDeviceInfo goldfish_bridge_info = {
     .init = goldfish_bridge_init,
-    .qdev.name  = "goldfish-bridge",
+    .qdev.name  = "goldfish_bridge",
     .qdev.size  = sizeof(SysBusDevice),
     .qdev.no_user = 1,
 };

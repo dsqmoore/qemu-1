@@ -185,7 +185,7 @@ DeviceState *goldfish_int_create(GoldfishBus *gbus, uint32_t base, qemu_irq pare
     DeviceState *dev;
     GoldfishDevice *gdev;
     GoldfishInterruptDevice *idev;
-    char *name = (char *)"goldfish-int";
+    char *name = (char *)"goldfish_int";
 
     dev = qdev_create(&gbus->bus, name);
     qdev_prop_set_string(dev, "name", name);
@@ -205,7 +205,7 @@ static GoldfishDeviceInfo goldfish_int_info = {
     .init = goldfish_int_init,
     .readfn = goldfish_int_readfn,
     .writefn = goldfish_int_writefn,
-    .qdev.name  = "goldfish-int",
+    .qdev.name  = "goldfish_int",
     .qdev.size  = sizeof(GoldfishInterruptDevice),
     .qdev.props = (Property[]) {
         DEFINE_PROP_UINT32("id", GoldfishDevice, id, -1),
