@@ -41,9 +41,9 @@ typedef struct GoldfishDeviceBusDevice {
     GoldfishDevice dev;
 } GoldfishDeviceBusDevice;
 
-qemu_irq *goldfish_pic;
 static GoldfishDevice *first_device;
 static GoldfishDevice *last_device;
+DeviceState *goldfish_int_device;
 uint32_t goldfish_free_base;
 uint32_t goldfish_free_irq;
 
@@ -52,7 +52,7 @@ void goldfish_device_set_irq(GoldfishDevice *dev, int irq, int level)
     if(irq >= dev->irq_count)
         cpu_abort (cpu_single_env, "goldfish_device_set_irq: Bad irq %d >= %d\n", irq, dev->irq_count);
     else
-        qemu_set_irq(goldfish_pic[dev->irq + irq], level);
+        qemu_set_irq(qdev_get_gpio_in(goldfish_int_device, dev->irq + irq),level);
 }
 
 static int goldfish_add_device_no_io(GoldfishDevice *dev)
@@ -182,9 +182,9 @@ static CPUWriteMemoryFunc *goldfish_device_bus_writefn[] = {
     goldfish_device_bus_write
 };
 
-void goldfish_device_init(qemu_irq *pic, uint32_t base, uint32_t irq)
+void goldfish_device_init(DeviceState *dev, uint32_t base, uint32_t irq)
 {
-    goldfish_pic = pic;
+    goldfish_int_device = dev;
     goldfish_free_base = base;
     goldfish_free_irq = irq;
 }

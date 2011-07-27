@@ -135,10 +135,8 @@ static CPUWriteMemoryFunc *goldfish_int_writefn[] = {
 static int goldfish_int_init(GoldfishDevice *dev)
 {
     GoldfishInterruptDevice *idev = (GoldfishInterruptDevice *)dev;
-    qemu_irq* qi;
     
-    qi = qemu_allocate_irqs(goldfish_int_set_irq, idev, 32);
-    goldfish_device_init(qi, 0xff010000, 10);
+    qdev_init_gpio_in(&idev->dev.qdev, goldfish_int_set_irq, 32);
 
     return 0;
 }

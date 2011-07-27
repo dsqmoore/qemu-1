@@ -42,6 +42,7 @@ static void android_arm_init_(ram_addr_t ram_size,
     //qemu_irq *goldfish_pic;
     int i;
     ram_addr_t ram_offset;
+    DeviceState *gf_int;
 
     if (!cpu_model)
         cpu_model = "arm926";
@@ -54,7 +55,8 @@ static void android_arm_init_(ram_addr_t ram_size,
     cpu_pic = arm_pic_init_cpu(env);
     //goldfish_pic = goldfish_interrupt_init(0xff000000, cpu_pic[ARM_PIC_CPU_IRQ], cpu_pic[ARM_PIC_CPU_FIQ]);
     GoldfishBus *gbus = goldfish_bus_init(0xff001000, 1);
-    goldfish_int_create(gbus, 0xff000000, cpu_pic[ARM_PIC_CPU_IRQ], cpu_pic[ARM_PIC_CPU_FIQ]);
+    gf_int = goldfish_int_create(gbus, 0xff000000, cpu_pic[ARM_PIC_CPU_IRQ], cpu_pic[ARM_PIC_CPU_FIQ]);
+    goldfish_device_init(gf_int, 0xff010000, 10);
     //goldfish_device_bus_create(gbus, 0xff001000, 1);
     goldfish_timer_create(gbus, 0xff003000, 3);
     goldfish_rtc_create(gbus);
