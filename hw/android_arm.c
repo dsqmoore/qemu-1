@@ -39,7 +39,6 @@ static void android_arm_init_(ram_addr_t ram_size,
 {
     CPUState *env;
     qemu_irq *cpu_pic;
-    //qemu_irq *goldfish_pic;
     int i;
     ram_addr_t ram_offset;
     DeviceState *gf_int;
@@ -53,20 +52,11 @@ static void android_arm_init_(ram_addr_t ram_size,
     cpu_register_physical_memory(0, ram_size, ram_offset | IO_MEM_RAM);
 
     cpu_pic = arm_pic_init_cpu(env);
-    //goldfish_pic = goldfish_interrupt_init(0xff000000, cpu_pic[ARM_PIC_CPU_IRQ], cpu_pic[ARM_PIC_CPU_FIQ]);
     GoldfishBus *gbus = goldfish_bus_init(0xff001000, 1);
     gf_int = goldfish_int_create(gbus, 0xff000000, cpu_pic[ARM_PIC_CPU_IRQ], cpu_pic[ARM_PIC_CPU_FIQ]);
     goldfish_device_init(gf_int, 0xff010000, 10);
-    //goldfish_device_bus_create(gbus, 0xff001000, 1);
     goldfish_timer_create(gbus, 0xff003000, 3);
     goldfish_rtc_create(gbus);
-    /*
-    goldfish_device_init(goldfish_pic, 0xff010000, 0x7f0000, 10, 22);
-
-    goldfish_device_bus_init(0xff001000, 1);
-
-    goldfish_timer_and_rtc_init(0xff003000, 3);
-*/
     goldfish_tty_create(gbus, serial_hds[0], 0, 0xff002000, 4);
     for(i = 1; i < MAX_SERIAL_PORTS; i++) {
         //printf("android_arm_init serial %d %x\n", i, serial_hds[i]);
