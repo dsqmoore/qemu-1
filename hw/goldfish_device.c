@@ -229,7 +229,8 @@ static GoldfishDeviceInfo goldfish_device_bus_info = {
 static void goldfish_device_bus_register(void)
 {
     goldfish_bus_register_withprop(&goldfish_device_bus_info);
-} device_init(goldfish_device_bus_register);
+}
+device_init(goldfish_device_bus_register);
 
 static int goldfish_busdev_init(DeviceState *qdev, DeviceInfo *qinfo)
 {
