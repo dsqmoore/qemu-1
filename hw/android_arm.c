@@ -65,6 +65,7 @@ static void android_arm_init_(ram_addr_t ram_size,
             goldfish_tty_create(gbus, serial_hds[i], i, 0, 0);
         }
     }
+    goldfish_fb_create(gbus, 0);
     
 
     info.ram_size        = ram_size;
