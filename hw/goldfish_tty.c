@@ -195,9 +195,7 @@ DeviceState *goldfish_tty_create(GoldfishBus *gbus, CharDriverState *cs, int id,
     qdev_prop_set_string(dev, "name", name);
     qdev_prop_set_uint32(dev, "id", id);
     qdev_prop_set_uint32(dev, "base", base);
-    qdev_prop_set_uint32(dev, "size", 0x1000);
     qdev_prop_set_uint32(dev, "irq", irq);
-    qdev_prop_set_uint32(dev, "irq_count", 1);
     qdev_prop_set_chr(dev, "chardev", cs);
     qdev_init_nofail(dev);
 

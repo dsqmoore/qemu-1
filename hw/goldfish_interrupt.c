@@ -150,9 +150,7 @@ DeviceState *goldfish_int_create(GoldfishBus *gbus, uint32_t base, qemu_irq pare
 
     dev = qdev_create(&gbus->bus, name);
     qdev_prop_set_string(dev, "name", name);
-    qdev_prop_set_uint32(dev, "id", -1);
     qdev_prop_set_uint32(dev, "base", base);
-    qdev_prop_set_uint32(dev, "size", 0x1000);
     qdev_init_nofail(dev);
     gdev = (GoldfishDevice *)dev;
     idev = DO_UPCAST(GoldfishInterruptDevice, dev, gdev);
