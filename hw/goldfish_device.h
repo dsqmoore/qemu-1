@@ -41,6 +41,7 @@ typedef struct GoldfishBus {
 
 void goldfish_bus_register_withprop(GoldfishDeviceInfo *info);
 GoldfishBus *goldfish_bus_init(uint32_t base, uint32_t irq);
+int goldfish_add_device_no_io(GoldfishDevice *dev);
 
 DeviceState *goldfish_timer_create(GoldfishBus *gbus, uint32_t base, int irq);
 DeviceState *goldfish_rtc_create(GoldfishBus *gbus);

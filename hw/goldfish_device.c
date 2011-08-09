@@ -55,7 +55,7 @@ void goldfish_device_set_irq(GoldfishDevice *dev, int irq, int level)
         qemu_set_irq(qdev_get_gpio_in(goldfish_int_device, dev->irq + irq),level);
 }
 
-static int goldfish_add_device_no_io(GoldfishDevice *dev)
+int goldfish_add_device_no_io(GoldfishDevice *dev)
 {
     if(dev->base == 0) {
         dev->base = goldfish_free_base;
