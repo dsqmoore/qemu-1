@@ -373,6 +373,9 @@ obj-arm-y += goldfish_tty.o goldfish_fb.o goldfish_nand.o
 obj-arm-y += ../android/utils/tempfile.o
 obj-arm-y += ../android/utils/bufprint.o
 obj-arm-y += ../android/utils/debug.o
+obj-arm-y += ../android/utils/filelock.o
+obj-arm-y += ../android/utils/path.o
+obj-arm-y += ../android/utils/system.o
 
 obj-sh4-y = shix.o r2d.o sh7750.o sh7750_regnames.o tc58128.o
 obj-sh4-y += sh_timer.o sh_serial.o sh_intc.o sh_pci.o sm501.o

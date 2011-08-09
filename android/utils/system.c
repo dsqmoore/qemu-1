@@ -10,9 +10,11 @@
 ** GNU General Public License for more details.
 */
 #include "android/utils/system.h"
-#include "android/utils/assert.h"
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef ACONFIG_USE_ASSERT
+#include "android/utils/assert.h"
+#endif
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>  /* for Sleep */
@@ -67,7 +69,7 @@ android_realloc( void*  block, size_t  size )
     if (block2 != NULL)
         return block2;
 
-    fprintf(stderr, "PANIC: not enough memory to reallocate %lld bytes\n", (uint64_t)size);
+    fprintf(stderr, "PANIC: not enough memory to reallocate %zu bytes\n", size);
     exit(1);
     return NULL;
 }
@@ -82,7 +84,7 @@ android_free( void*  block )
 void*
 _android_array_alloc( size_t  itemSize, size_t  count )
 {
-#if ACONFIG_USE_ASSERT
+#ifdef ACONFIG_USE_ASSERT
     size_t  maxSize;
 
     if (itemSize == 0)
@@ -106,7 +108,7 @@ _android_array_alloc0( size_t  itemSize, size_t  count )
 void*
 _android_array_realloc( void* block, size_t  itemSize, size_t  count )
 {
-#if ACONFIG_USE_ASSERT
+#ifdef ACONFIG_USE_ASSERT
     size_t  maxSize;
 
     if (itemSize == 0)

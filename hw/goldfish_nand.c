@@ -10,10 +10,13 @@
 ** GNU General Public License for more details.
 */
 #include "hw.h"
+#include "goldfish_device.h"
 #include "goldfish_nand_reg.h"
 #include "goldfish_nand.h"
 #include "android/utils/tempfile.h"
-//#include "android/utils/debug.h"
+#include "android/utils/filelock.h"
+#include "android/utils/debug.h"
+#include "android/utils/path.h"
 //#include "android/android.h"
 
 #ifdef TARGET_I386
@@ -32,6 +35,9 @@
 #  define  T(...)    ((void)0)
 #  define  T_ACTIVE  0
 #endif
+#define  PANIC(...) do { fprintf(stderr, __VA_ARGS__);  \
+                         exit(1);                       \
+                    } while (0)
 
 /* lseek uses 64-bit offsets on Darwin. */
 /* prefer lseek64 on Linux              */
@@ -134,6 +140,31 @@ typedef struct {
     uint32_t data;
     uint32_t result;
 } nand_dev_controller_state;
+
+typedef struct GoldfishNandDevice {
+    GoldfishDevice qdev;
+    char *system_path;
+    char *system_init_path;
+    uint64_t system_size;
+
+    char *user_data_path;
+    char *user_data_init_path;
+    uint64_t user_data_size;
+    
+    char *cache_path;
+    uint64_t cache_size;
+    uint32_t base;
+
+    // register state
+    uint32_t dev;            /* offset in nand_devs for the device that is
+                              * currently being accessed */
+    uint32_t addr_low;
+    uint32_t addr_high;
+    uint32_t transfer_size;
+    uint32_t data;
+    uint32_t result;
+} GoldfishNandDevice;
+
 #ifdef ANDROID_SAVE
 /* update this everytime you change the nand_dev_controller_state structure
  * 1: initial version, saving only nand_dev_controller_state fields
@@ -620,21 +651,6 @@ static CPUWriteMemoryFunc *nand_dev_writefn[] = {
 };
 
 /* initialize the QFB device */
-void nand_dev_init(uint32_t base)
-{
-    int iomemtype;
-    //static int  instance_id = 0;
-    nand_dev_controller_state *s;
-
-    s = (nand_dev_controller_state *)qemu_mallocz(sizeof(nand_dev_controller_state));
-    iomemtype = cpu_register_io_memory(nand_dev_readfn, nand_dev_writefn, s, DEVICE_NATIVE_ENDIAN);
-    cpu_register_physical_memory(base, 0x00000fff, iomemtype);
-    s->base = base;
-
-    //register_savevm( NULL, "nand_dev", instance_id++, NAND_DEV_STATE_SAVE_VERSION,
-    //                  nand_dev_controller_state_save, nand_dev_controller_state_load, s);
-}
-
 static int arg_match(const char *a, const char *b, size_t b_len)
 {
     while(*a && b_len--) {
@@ -842,6 +858,152 @@ bad_arg_and_value:
     XLOG("bad arg: %.*s=%.*s\n", arg_len, arg, value_len, value);
     exit(1);
 }
+
+static int goldfish_nand_init(GoldfishDevice *dev)
+{
+    GoldfishNandDevice *s = (GoldfishNandDevice *)dev;
+    /* Initialize system partition image */
+    {
+        char        tmp[PATH_MAX+32];
+        const char* sysImage = s->system_path;
+        const char* initImage = s->system_init_path;
+        uint64_t    sysBytes = s->system_size;
+
+        if (sysBytes == 0) {
+            PANIC("Invalid system partition size: %jd", sysBytes);
+        }
+
+        snprintf(tmp,sizeof(tmp),"system,size=0x%jx", sysBytes);
+
+        if (sysImage && *sysImage) {
+            if (filelock_create(sysImage) == NULL) {
+                fprintf(stderr,"WARNING: System image already in use, changes will not persist!\n");
+                /* If there is no file= parameters, nand_add_dev will create
+                 * a temporary file to back the partition image. */
+            } else {
+                pstrcat(tmp,sizeof(tmp),",file=");
+                pstrcat(tmp,sizeof(tmp),sysImage);
+            }
+        }
+        if (initImage && *initImage) {
+            if (!path_exists(initImage)) {
+                PANIC("Invalid initial system image path: %s", initImage);
+            }
+            pstrcat(tmp,sizeof(tmp),",initfile=");
+            pstrcat(tmp,sizeof(tmp),initImage);
+        } else {
+            PANIC("Missing initial system image path!");
+        }
+        nand_add_dev(tmp);
+    }
+
+    /* Initialize data partition image */
+    {
+        char        tmp[PATH_MAX+32];
+        const char* dataImage = s->user_data_path;
+        const char* initImage = s->user_data_init_path;
+        uint64_t    dataBytes = s->user_data_size;
+
+        if (dataBytes == 0) {
+            PANIC("Invalid data partition size: %jd", dataBytes);
+        }
+
+        snprintf(tmp,sizeof(tmp),"userdata,size=0x%jx", dataBytes);
+
+        if (dataImage && *dataImage) {
+            if (filelock_create(dataImage) == NULL) {
+                fprintf(stderr, "WARNING: Data partition already in use. Changes will not persist!\n");
+                /* Note: if there is no file= parameters, nand_add_dev() will
+                 *       create a temporary file to back the partition image. */
+            } else {
+                /* Create the file if needed */
+                if (!path_exists(dataImage)) {
+                    if (path_empty_file(dataImage) < 0) {
+                        PANIC("Could not create data image file %s: %s", dataImage, strerror(errno));
+                    }
+                }
+                pstrcat(tmp, sizeof(tmp), ",file=");
+                pstrcat(tmp, sizeof(tmp), dataImage);
+            }
+        }
+        if (initImage && *initImage) {
+            pstrcat(tmp, sizeof(tmp), ",initfile=");
+            pstrcat(tmp, sizeof(tmp), initImage);
+        }
+        nand_add_dev(tmp);
+    }
+
+    /* Initialize cache partition */
+    {
+        char        tmp[PATH_MAX+32];
+        const char* partPath = s->cache_path;
+        uint64_t    partSize = s->cache_size;
+
+        snprintf(tmp,sizeof(tmp),"cache,size=0x%jx", partSize);
+
+        if (partPath && *partPath && strcmp(partPath, "<temp>") != 0) {
+            if (filelock_create(partPath) == NULL) {
+                fprintf(stderr, "WARNING: Cache partition already in use. Changes will not persist!\n");
+                /* Note: if there is no file= parameters, nand_add_dev() will
+                 *       create a temporary file to back the partition image. */
+            } else {
+                /* Create the file if needed */
+                if (!path_exists(partPath)) {
+                    if (path_empty_file(partPath) < 0) {
+                        PANIC("Could not create cache image file %s: %s", partPath, strerror(errno));
+                    }
+                }
+                pstrcat(tmp, sizeof(tmp), ",file=");
+                pstrcat(tmp, sizeof(tmp), partPath);
+            }
+        }
+        nand_add_dev(tmp);
+    }
+    return 0;
+}
+
+DeviceState *goldfish_nand_create(GoldfishBus *gbus)
+{
+    DeviceState *dev;
+    char *name = (char *)"goldfish_nand";
+
+    dev = qdev_create(&gbus->bus, name);
+    qdev_prop_set_string(dev, "name", name);
+    qdev_init_nofail(dev);
+
+    return dev;
+}
+
+static GoldfishDeviceInfo goldfish_nand_info = {
+    .init = goldfish_nand_init,
+    .readfn = nand_dev_readfn,
+    .writefn = nand_dev_writefn,
+    .qdev.name  = "goldfish_nand",
+    .qdev.size  = sizeof(GoldfishNandDevice),
+    .qdev.props = (Property[]) {
+        DEFINE_PROP_UINT32("base", GoldfishDevice, base, 0),
+        DEFINE_PROP_UINT32("id", GoldfishDevice, id, 0),
+        DEFINE_PROP_UINT32("size", GoldfishDevice, size, 0xfff),
+        DEFINE_PROP_UINT32("irq", GoldfishDevice, irq, 0),
+        DEFINE_PROP_UINT32("irq_count", GoldfishDevice, irq_count, 1),
+        DEFINE_PROP_STRING("name", GoldfishDevice, name),
+        DEFINE_PROP_STRING("system_path", GoldfishNandDevice, system_path),
+        DEFINE_PROP_STRING("system_init_path", GoldfishNandDevice, system_init_path),
+        DEFINE_PROP_UINT64("system_size", GoldfishNandDevice, system_size, 0x7100000),
+        DEFINE_PROP_STRING("user_data_path", GoldfishNandDevice, user_data_path),
+        DEFINE_PROP_STRING("user_data_init_path", GoldfishNandDevice, user_data_init_path),
+        DEFINE_PROP_UINT64("user_data_size", GoldfishNandDevice, user_data_size, 0x4200000),
+        DEFINE_PROP_STRING("cache_path", GoldfishNandDevice, cache_path),
+        DEFINE_PROP_UINT64("cache_size", GoldfishNandDevice, cache_size, 0x4200000),
+        DEFINE_PROP_END_OF_LIST(),
+    },
+};
+
+static void goldfish_nand_register(void)
+{
+    goldfish_bus_register_withprop(&goldfish_nand_info);
+}
+device_init(goldfish_nand_register);
 
 #ifdef CONFIG_NAND_LIMITS
 

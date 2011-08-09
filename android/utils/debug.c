@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+unsigned long android_verbose = 1;
+
 void
 dprint( const char*  format,  ... )
 {
@@ -70,6 +72,7 @@ derror( const char*  format, ... )
  ** this is useful to get rid of debug messages from ALSA and esd
  ** on Linux.
  **/
+/*
 static int    stdio_disable_count;
 static int    stdio_save_out_fd;
 static int    stdio_save_err_fd;
@@ -139,3 +142,4 @@ stdio_enable( void )
     }
 }
 #endif
+*/

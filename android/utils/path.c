@@ -34,8 +34,8 @@
 #include <signal.h>
 #endif
 
-#include "android/utils/debug.h"
-#define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
+//#include "android/utils/debug.h"
+//#define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 
 #ifndef CHECKED
 #  ifdef _WIN32
@@ -403,8 +403,8 @@ path_get_size( const char*  path, uint64_t  *psize )
 #endif
 }
 
-
-ABool
+/*
+static ABool
 path_is_absolute( const char*  path )
 {
 #ifdef _WIN32
@@ -414,11 +414,11 @@ path_is_absolute( const char*  path )
     if (path[0] == '/' || path[0] == '\\')
         return 1;
 
-    /* 'C:' is always considered to be absolute
+*/    /* 'C:' is always considered to be absolute
      * even if used with a relative path like C:foo which
      * is different from C:\foo
      */
-    if (path[0] != 0 && path[1] == ':')
+/*    if (path[0] != 0 && path[1] == ':')
         return 1;
 
     return 0;
@@ -426,7 +426,7 @@ path_is_absolute( const char*  path )
     return (path != NULL && path[0] == '/');
 #endif
 }
-
+*/
 
 /** OTHER FILE UTILITIES
  **
@@ -467,8 +467,8 @@ path_copy_file( const char*  dest, const char*  source )
     }
 
     if ( access(source, R_OK) < 0 ) {
-        D("%s: source file is un-readable: %s\n",
-          __FUNCTION__, source);
+        //D("%s: source file is un-readable: %s\n",
+        //  __FUNCTION__, source);
         return -1;
     }
 
@@ -488,8 +488,8 @@ path_copy_file( const char*  dest, const char*  source )
             if (write(fd, buf, n) != n) {
                 /* write failed. Make it return -1 so that an
                  * empty file be created. */
-                D("Failed to copy '%s' to '%s': %s (%d)",
-                       source, dest, strerror(errno), errno);
+                //D("Failed to copy '%s' to '%s': %s (%d)",
+                //       source, dest, strerror(errno), errno);
                 result = -1;
                 break;
             }
@@ -583,8 +583,6 @@ path_search_exec( const char* filename )
 {
     const char* sysPath = getenv("PATH");
     char        temp[PATH_MAX];
-    int         count;
-    int         slen;
     const char* p;
 
     /* If the file contains a directory separator, don't search */
@@ -609,8 +607,6 @@ path_search_exec( const char* filename )
      * Items are separated by DIR_SEP, and two successive separators
      * correspond to an empty item that will be ignored.
      * Also compute the required string storage length. */
-    count   = 0;
-    slen    = 0;
     p       = sysPath;
 
     while (*p) {
