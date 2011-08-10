@@ -52,6 +52,7 @@ DeviceState *goldfish_nand_create(GoldfishBus *gbus);
 DeviceState *goldfish_events_create(GoldfishBus *gbus, DeviceState *goldfish_int_dev);
 DeviceState *goldfish_switch_create(GoldfishBus *gbus, const char *name_dev, uint32_t (*writefn)(void *opaque, uint32_t state), void *writeopaque, int id);
 DeviceState *goldfish_battery_create(GoldfishBus *gbus);
+DeviceState *goldfish_memlog_create(GoldfishBus *gbus, uint32_t base);
 void goldfish_switch_set_state(void *opaque, uint32_t state);
 void goldfish_device_init(DeviceState *dev, uint32_t base, uint32_t irq);
 void goldfish_device_set_irq(GoldfishDevice *dev, int irq, int level);
