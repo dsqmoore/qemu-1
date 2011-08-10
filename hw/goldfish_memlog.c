@@ -9,17 +9,13 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-
-//#include "qemu_file.h"
 #include "goldfish_device.h"
-#include "audio/audio.h"
 
-extern void  dprint(const char*  fmt, ...);
 
-int fd = -1;
+typedef struct GoldfishMemlogDevice {
+    GoldfishDevice dev;
+    int fd;
+} GoldfishMemlogDevice;
 
 static uint32_t memlog_read(void *opaque, target_phys_addr_t offset)
 {
@@ -28,15 +24,14 @@ static uint32_t memlog_read(void *opaque, target_phys_addr_t offset)
     return 0;
 }
 
-unsigned info[8];
-
 static void memlog_write(void *opaque, target_phys_addr_t offset, uint32_t val)
 {
+    static unsigned info[8];
     char buf[128];
-    GoldfishDevice *dev = (GoldfishDevice *)opaque;
+    GoldfishMemlogDevice *s = (GoldfishMemlogDevice *)opaque;
     int ret;
 
-    (void)dev;
+    (void)s->dev;
 
     if (offset < 8*4)
         info[offset / 4] = val;
@@ -45,7 +40,7 @@ static void memlog_write(void *opaque, target_phys_addr_t offset, uint32_t val)
             /* write PID and VADDR to logfile */
         snprintf(buf, sizeof buf, "%08x %08x\n", info[0], info[1]);
         do {
-            ret = write(fd, buf, strlen(buf));
+            ret = write(s->fd, buf, strlen(buf));
         } while (ret < 0 && errno == EINTR);
     }
 }
@@ -65,9 +60,10 @@ static CPUWriteMemoryFunc *memlog_writefn[] = {
 
 static int goldfish_memlog_init(GoldfishDevice *dev)
 {
+    GoldfishMemlogDevice *s = (GoldfishMemlogDevice *)dev;
     do {
-        fd = open("mem.log", /* O_CREAT | */ O_TRUNC | O_WRONLY, 0644);
-    } while (fd < 0 && errno == EINTR);
+        s->fd = open("mem.log", /* O_CREAT | */ O_TRUNC | O_WRONLY, 0644);
+    } while (s->fd < 0 && errno == EINTR);
 
     return 0;
 }
@@ -90,7 +86,7 @@ static GoldfishDeviceInfo goldfish_memlog_info = {
     .readfn = memlog_readfn,
     .writefn = memlog_writefn,
     .qdev.name  = "goldfish_memlog",
-    .qdev.size  = sizeof(GoldfishDevice),
+    .qdev.size  = sizeof(GoldfishMemlogDevice),
     .qdev.props = (Property[]) {
         DEFINE_PROP_UINT32("base", GoldfishDevice, base, 0),
         DEFINE_PROP_UINT32("id", GoldfishDevice, id, 0),
@@ -98,6 +94,7 @@ static GoldfishDeviceInfo goldfish_memlog_info = {
         DEFINE_PROP_UINT32("irq", GoldfishDevice, irq, 0),
         DEFINE_PROP_UINT32("irq_count", GoldfishDevice, irq_count, 0),
         DEFINE_PROP_STRING("name", GoldfishDevice, name),
+        DEFINE_PROP_INT32("fd", GoldfishMemlogDevice, fd, -1),
         DEFINE_PROP_END_OF_LIST(),
     },
 };
