@@ -30,6 +30,14 @@ static struct arm_boot_info info = {
     .board_id = 1441,
 };
 
+#define TEST_SWITCH 1
+#if TEST_SWITCH
+static uint32_t switch_test_write(void *opaque, uint32_t state)
+{
+    goldfish_switch_set_state(opaque, state);
+    return state;
+}
+#endif
 static void android_arm_init_(ram_addr_t ram_size,
     const char *boot_device,
     const char *kernel_filename,
@@ -65,10 +73,19 @@ static void android_arm_init_(ram_addr_t ram_size,
             goldfish_tty_create(gbus, serial_hds[i], i, 0, 0);
         }
     }
+
     goldfish_fb_create(gbus, 0);
     goldfish_nand_create(gbus);
     goldfish_events_create(gbus, gf_int);
     
+#if TEST_SWITCH
+    {
+        void *sw;
+        sw = goldfish_switch_create(gbus, "test", NULL, NULL, 0);
+        goldfish_switch_set_state(sw, 1);
+        goldfish_switch_create(gbus, "test2", switch_test_write, sw, 1);
+    }
+#endif
 
     info.ram_size        = ram_size;
     info.kernel_filename = kernel_filename;
