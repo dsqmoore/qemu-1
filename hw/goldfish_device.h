@@ -49,6 +49,7 @@ DeviceState *goldfish_int_create(GoldfishBus *gbus, uint32_t base, qemu_irq pare
 DeviceState *goldfish_tty_create(GoldfishBus *gbus, CharDriverState *cs, int id, uint32_t base, int irq);
 DeviceState *goldfish_fb_create(GoldfishBus *gbus, int id);
 DeviceState *goldfish_nand_create(GoldfishBus *gbus);
+DeviceState *goldfish_events_create(GoldfishBus *gbus, DeviceState *goldfish_int_dev);
 void goldfish_device_init(DeviceState *dev, uint32_t base, uint32_t irq);
 void goldfish_device_set_irq(GoldfishDevice *dev, int irq, int level);
 #endif
