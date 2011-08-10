@@ -134,7 +134,6 @@ static CPUReadMemoryFunc *goldfish_battery_readfn[] = {
     goldfish_battery_read
 };
 
-
 static CPUWriteMemoryFunc *goldfish_battery_writefn[] = {
     goldfish_battery_write,
     goldfish_battery_write,
@@ -236,13 +235,15 @@ void goldfish_battery_display(void *opaque, void (* callback)(void *data, const 
 
 static int goldfish_battery_init(GoldfishDevice *dev)
 {
+    GoldfishBatteryDevice *s = (GoldfishBatteryDevice *)dev;
+    printf("bat_init: 0x%x\n", s->present);
     return 0;
 }
 
 DeviceState *goldfish_battery_create(GoldfishBus *gbus)
 {
     DeviceState *dev;
-    char *name = (char *)"goldfish_battery";
+    char *name = (char *)"goldfish-battery";
 
     dev = qdev_create(&gbus->bus, name);
     qdev_prop_set_string(dev, "name", name);
@@ -255,7 +256,7 @@ static GoldfishDeviceInfo goldfish_battery_info = {
     .init = goldfish_battery_init,
     .readfn = goldfish_battery_readfn,
     .writefn = goldfish_battery_writefn,
-    .qdev.name  = "goldfish_battery",
+    .qdev.name  = "goldfish-battery",
     .qdev.size  = sizeof(GoldfishBatteryDevice),
     .qdev.props = (Property[]) {
         DEFINE_PROP_UINT32("base", GoldfishDevice, base, 0),
