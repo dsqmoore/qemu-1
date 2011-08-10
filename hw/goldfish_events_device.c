@@ -217,7 +217,6 @@ static uint32_t events_read(void *x, target_phys_addr_t off)
 {
     GoldfishEventsDevice *s = (GoldfishEventsDevice *) x;
     int offset = off; // - s->base;
-    printf("Events_read: %d\n", offset);
 
     /* This gross hack below is used to ensure that we
      * only raise the IRQ when the kernel driver is
