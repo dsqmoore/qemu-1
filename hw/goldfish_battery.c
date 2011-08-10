@@ -235,8 +235,6 @@ void goldfish_battery_display(void *opaque, void (* callback)(void *data, const 
 
 static int goldfish_battery_init(GoldfishDevice *dev)
 {
-    GoldfishBatteryDevice *s = (GoldfishBatteryDevice *)dev;
-    printf("bat_init: 0x%x\n", s->present);
     return 0;
 }
 
