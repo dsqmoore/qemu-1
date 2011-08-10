@@ -30,7 +30,7 @@ static struct arm_boot_info info = {
     .board_id = 1441,
 };
 
-#define TEST_SWITCH 1
+#define TEST_SWITCH 0
 #if TEST_SWITCH
 static uint32_t switch_test_write(void *opaque, uint32_t state)
 {
