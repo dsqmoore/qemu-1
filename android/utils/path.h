@@ -58,7 +58,7 @@ extern ABool  path_is_regular( const char*  path );
 extern ABool  path_is_dir( const char*  path );
 
 /* checks that a path is absolute or not */
-extern ABool  path_is_absolute( const char*  path );
+//extern ABool  path_is_absolute( const char*  path );
 
 /* checks that one can read/write a given (regular) file */
 extern ABool  path_can_read( const char*  path );

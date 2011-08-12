@@ -12,7 +12,10 @@
 #include "goldfish_device.h"
 #include "mmc.h"
 #include "sd.h"
-#include "block.h"
+//#include "block.h"
+#include "blockdev.h"
+#include "android/utils/path.h"
+#include "android/utils/filelock.h"
 
 enum {
     /* status register */
@@ -60,6 +63,7 @@ enum {
 
 typedef struct GoldfishMMCDevice{
     GoldfishDevice dev;
+    char *sdpath;
     BlockDriverState *bs;
     // pointer to our buffer
     uint32_t buffer_address;
@@ -504,11 +508,39 @@ static int goldfish_mmc_init(GoldfishDevice *dev)
 {
     GoldfishMMCDevice *mdev = (GoldfishMMCDevice *)dev;
     mdev->buf = qemu_memalign(512,512);
+
+    /* Init SD-Card stuff. For Android, it is always hda */
+    const char* sdPath = mdev->sdpath;
+    if (sdPath && *sdPath) {
+        if (!path_exists(sdPath)) {
+            fprintf(stderr, "WARNING: SD Card image is missing: %s\n", sdPath);
+        } else if (filelock_create(sdPath) == NULL) {
+            fprintf(stderr, "WARNING: SD Card image already in use: %s\n", sdPath);
+        } else {
+            /* Successful locking */
+            QemuOpts *hda_opts;
+            hda_opts = drive_add( IF_IDE, 0, sdPath, "index=0,media=disk");
+            /* Set this property of any operation involving the SD Card
+             * will be x100 slower, due to the corresponding file being
+             * mounted as O_DIRECT. Note that this is only 'unsafe' in
+             * the context of an emulator crash. The data is already
+             * synced properly when the emulator exits (either normally or through ^C).
+             */
+            qemu_opt_set(hda_opts, "cache", "unsafe");
+        }
+    }
+    DriveInfo* info = drive_get( IF_IDE, 1, 0 );
+    if (info == NULL) {
+        return 1;
+    }
+    mdev->bs = info->bdrv;
     return 0;
 }
 
-DeviceState *goldfish_mmc_create(GoldfishBus *gbus, uint32_t base, int id, BlockDriverState* bs)
+DeviceState *goldfish_mmc_create(GoldfishBus *gbus, uint32_t base, int id)
 {
+    // The error lies with incorrectly retrieving DriveInfo using drive_get in goldfish_mmc_init
+    return 0; // Disable non-working device for now
     DeviceState *dev;
     char *name = (char *)"goldfish_mmc";
 
@@ -516,7 +548,6 @@ DeviceState *goldfish_mmc_create(GoldfishBus *gbus, uint32_t base, int id, Block
     qdev_prop_set_string(dev, "name", name);
     qdev_prop_set_uint32(dev, "base", base);
     qdev_prop_set_uint32(dev, "id", id);
-    qdev_prop_set_drive_nofail(dev, "bs", bs);
     qdev_init_nofail(dev);
 
     return dev;
@@ -535,7 +566,7 @@ static GoldfishDeviceInfo goldfish_mmc_info = {
         DEFINE_PROP_UINT32("irq", GoldfishDevice, irq, 0),
         DEFINE_PROP_UINT32("irq_count", GoldfishDevice, irq_count, 1),
         DEFINE_PROP_STRING("name", GoldfishDevice, name),
-        DEFINE_PROP_DRIVE("bs", GoldfishMMCDevice, bs),
+        DEFINE_PROP_STRING("sdpath", GoldfishMMCDevice, sdpath),
         DEFINE_PROP_END_OF_LIST(),
     },
 };

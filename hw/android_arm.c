@@ -18,7 +18,6 @@
 #include "audio/audio.h"
 #include "arm-misc.h"
 #include "console.h"
-#include "blockdev.h"
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK
@@ -94,12 +93,7 @@ static void android_arm_init_(ram_addr_t ram_size,
     }
 
     goldfish_fb_create(gbus, 0);
-    {
-        DriveInfo* info = drive_get( IF_IDE, 0, 0 );
-        if (info != NULL) {
-            goldfish_mmc_create(gbus, 0xff005000, 0, info->bdrv);
-        }
-    }
+    goldfish_mmc_create(gbus, 0xff005000, 0);
     goldfish_memlog_create(gbus, 0xff006000);
     goldfish_battery_create(gbus);
     goldfish_events_create(gbus, gf_int);
