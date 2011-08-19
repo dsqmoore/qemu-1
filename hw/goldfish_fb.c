@@ -9,13 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-//#include "qemu_file.h"
-//#include "android/android.h"
-//#include "android/utils/debug.h"
-//#include "android/utils/duff.h"
 #include "goldfish_device.h"
 #include "console.h"
-#define VERBOSE_CHECK(x) 0
 
 #define  DUFF4(_count,_stmnt)  \
     ({ \
@@ -75,77 +70,7 @@ typedef struct GoldfishFBDevice {
     int      rotation;   /* 0, 1, 2 or 3 */
     int      dpi;
 } GoldfishFBDevice;
-/*
-#define  GOLDFISH_FB_SAVE_VERSION  2
 
-static void goldfish_fb_save(QEMUFile*  f, void*  opaque)
-{
-    GoldfishFBDevice *s = (GoldfishFBDevice *)opaque;
-
-    DisplayState*  ds = s->ds;
-
-    qemu_put_be32(f, ds->surface->width);
-    qemu_put_be32(f, ds->surface->height);
-    qemu_put_be32(f, ds->surface->linesize);
-    qemu_put_byte(f, 0);
-
-    qemu_put_be32(f, s->fb_base);
-    qemu_put_byte(f, s->base_valid);
-    qemu_put_byte(f, s->need_update);
-    qemu_put_byte(f, s->need_int);
-    qemu_put_byte(f, s->set_rotation);
-    qemu_put_byte(f, s->blank);
-    qemu_put_be32(f, s->int_status);
-    qemu_put_be32(f, s->int_enable);
-    qemu_put_be32(f, s->rotation);
-    qemu_put_be32(f, s->dpi);
-}
-
-static int  goldfish_fb_load(QEMUFile*  f, void*  opaque, int  version_id)
-{
-    GoldfishFBDevice *s = (GoldfishFBDevice *)opaque;
-    int                        ret = -1;
-    int                        ds_w, ds_h, ds_pitch, ds_rot;
-
-    if (version_id != GOLDFISH_FB_SAVE_VERSION)
-        goto Exit;
-
-    ds_w     = qemu_get_be32(f);
-    ds_h     = qemu_get_be32(f);
-    ds_pitch = qemu_get_be32(f);
-    ds_rot   = qemu_get_byte(f);
-
-    DisplayState*  ds = s->ds;
-
-    if (ds->surface->width != ds_w ||
-        ds->surface->height != ds_h ||
-        ds->surface->linesize != ds_pitch ||
-        ds_rot != 0)
-    {
-*/        /* XXX: We should be able to force a resize/rotation from here ? */
-/*        fprintf(stderr, "%s: framebuffer dimensions mismatch\n", __FUNCTION__);
-        goto Exit;
-    }
-
-    s->fb_base      = qemu_get_be32(f);
-    s->base_valid   = qemu_get_byte(f);
-    s->need_update  = qemu_get_byte(f);
-    s->need_int     = qemu_get_byte(f);
-    s->set_rotation = qemu_get_byte(f);
-    s->blank        = qemu_get_byte(f);
-    s->int_status   = qemu_get_be32(f);
-    s->int_enable   = qemu_get_be32(f);
-    s->rotation     = qemu_get_be32(f);
-    s->dpi          = qemu_get_be32(f);
-
-*/    /* force a refresh */
-/*    s->need_update = 1;
-
-    ret = 0;
-Exit:
-    return ret;
-}
-*/
 /* Type used to record a mapping from display surface pixel format to
  * HAL pixel format */
 typedef struct {
@@ -177,20 +102,20 @@ static int goldfish_fb_get_pixel_format(GoldfishFBDevice *s)
 
     /* Determine HAL pixel format value based on s->ds */
     struct PixelFormat* pf = &s->ds->surface->pf;
-    if (VERBOSE_CHECK(init)) {
-        printf("%s:%d: display surface,pixel format:\n", __FUNCTION__, __LINE__);
-        printf("  bits/pixel:  %d\n", pf->bits_per_pixel);
-        printf("  bytes/pixel: %d\n", pf->bytes_per_pixel);
-        printf("  depth:       %d\n", pf->depth);
-        printf("  red:         bits=%d mask=0x%x shift=%d max=0x%x\n",
-            pf->rbits, pf->rmask, pf->rshift, pf->rmax);
-        printf("  green:       bits=%d mask=0x%x shift=%d max=0x%x\n",
-            pf->gbits, pf->gmask, pf->gshift, pf->gmax);
-        printf("  blue:        bits=%d mask=0x%x shift=%d max=0x%x\n",
-            pf->bbits, pf->bmask, pf->bshift, pf->bmax);
-        printf("  alpha:       bits=%d mask=0x%x shift=%d max=0x%x\n",
-            pf->abits, pf->amask, pf->ashift, pf->amax);
-    }
+#if 0
+    printf("%s:%d: display surface,pixel format:\n", __FUNCTION__, __LINE__);
+    printf("  bits/pixel:  %d\n", pf->bits_per_pixel);
+    printf("  bytes/pixel: %d\n", pf->bytes_per_pixel);
+    printf("  depth:       %d\n", pf->depth);
+    printf("  red:         bits=%d mask=0x%x shift=%d max=0x%x\n",
+        pf->rbits, pf->rmask, pf->rshift, pf->rmax);
+    printf("  green:       bits=%d mask=0x%x shift=%d max=0x%x\n",
+        pf->gbits, pf->gmask, pf->gshift, pf->gmax);
+    printf("  blue:        bits=%d mask=0x%x shift=%d max=0x%x\n",
+        pf->bbits, pf->bmask, pf->bshift, pf->bmax);
+    printf("  alpha:       bits=%d mask=0x%x shift=%d max=0x%x\n",
+        pf->abits, pf->amask, pf->ashift, pf->amax);
+#endif
 
     s->bytes_per_pixel = pf->bytes_per_pixel;
     int nn;

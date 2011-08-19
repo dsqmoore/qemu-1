@@ -9,7 +9,6 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-//#include "qemu_file.h"
 #include "goldfish_device.h"
 #include "power_supply.h"
 
@@ -45,38 +44,7 @@ typedef struct GoldfishBatteryDevice {
     int present;
     int capacity;
 } GoldfishBatteryDevice;
-#ifdef ANDROID_SAVE
-/* update this each time you update the battery_state struct */
-#define  BATTERY_STATE_SAVE_VERSION  1
 
-#define  QFIELD_STRUCT  struct goldfish_battery_state
-QFIELD_BEGIN(goldfish_battery_fields)
-    QFIELD_INT32(int_status),
-    QFIELD_INT32(int_enable),
-    QFIELD_INT32(ac_online),
-    QFIELD_INT32(status),
-    QFIELD_INT32(health),
-    QFIELD_INT32(present),
-    QFIELD_INT32(capacity),
-QFIELD_END
-
-static void  goldfish_battery_save(QEMUFile*  f, void* opaque)
-{
-    struct goldfish_battery_state*  s = opaque;
-
-    qemu_put_struct(f, goldfish_battery_fields, s);
-}
-
-static int   goldfish_battery_load(QEMUFile*  f, void*  opaque, int  version_id)
-{
-    struct goldfish_battery_state*  s = opaque;
-
-    if (version_id != BATTERY_STATE_SAVE_VERSION)
-        return -1;
-
-    return qemu_get_struct(f, goldfish_battery_fields, s);
-}
-#endif
 static uint32_t goldfish_battery_read(void *opaque, target_phys_addr_t offset)
 {
     uint32_t ret;

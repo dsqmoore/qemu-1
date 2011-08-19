@@ -39,10 +39,8 @@ typedef struct GoldfishBus {
     GoldfishDevice *current;
 } GoldfishBus;
 
-void goldfish_bus_register_withprop(GoldfishDeviceInfo *info);
-GoldfishBus *goldfish_bus_init(uint32_t base, uint32_t irq);
-int goldfish_add_device_no_io(GoldfishDevice *dev);
 
+/* QDEV device creation */
 DeviceState *goldfish_timer_create(GoldfishBus *gbus, uint32_t base, int irq);
 DeviceState *goldfish_rtc_create(GoldfishBus *gbus);
 DeviceState *goldfish_int_create(GoldfishBus *gbus, uint32_t base, qemu_irq parent_irq, qemu_irq parent_fiq);
@@ -54,6 +52,11 @@ DeviceState *goldfish_switch_create(GoldfishBus *gbus, const char *name_dev, uin
 DeviceState *goldfish_battery_create(GoldfishBus *gbus);
 DeviceState *goldfish_memlog_create(GoldfishBus *gbus, uint32_t base);
 DeviceState *goldfish_mmc_create(GoldfishBus *gbus, uint32_t base, int id);
+GoldfishBus *goldfish_bus_init(uint32_t base, uint32_t irq);
+
+/* Global functions provided by Goldfish devices */
+void goldfish_bus_register_withprop(GoldfishDeviceInfo *info);
+int goldfish_add_device_no_io(GoldfishDevice *dev);
 void goldfish_switch_set_state(void *opaque, uint32_t state);
 void goldfish_device_init(DeviceState *dev, uint32_t base, uint32_t irq);
 void goldfish_device_set_irq(GoldfishDevice *dev, int irq, int level);

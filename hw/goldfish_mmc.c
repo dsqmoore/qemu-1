@@ -12,7 +12,6 @@
 #include "goldfish_device.h"
 #include "mmc.h"
 #include "sd.h"
-//#include "block.h"
 #include "blockdev.h"
 #include "android/utils/path.h"
 #include "android/utils/filelock.h"
@@ -87,42 +86,7 @@ typedef struct GoldfishMMCDevice{
 
 #define SD_APP_OP_COND           41
 #define SD_APP_SEND_SCR          51
-#ifdef ANDROID_SAVE
-#define  GOLDFISH_MMC_SAVE_VERSION  2
-#define  QFIELD_STRUCT  struct goldfish_mmc_state
-QFIELD_BEGIN(goldfish_mmc_fields)
-    QFIELD_INT32(buffer_address),
-    QFIELD_INT32(read_offset),
-    QFIELD_INT32(write_offset),
-    QFIELD_INT32(int_status),
-    QFIELD_INT32(int_enable),
-    QFIELD_INT32(arg),
-    QFIELD_INT32(resp[0]),
-    QFIELD_INT32(resp[1]),
-    QFIELD_INT32(resp[2]),
-    QFIELD_INT32(resp[3]),
-    QFIELD_INT32(block_length),
-    QFIELD_INT32(block_count),
-    QFIELD_INT32(is_SDHC),
-QFIELD_END
 
-static void  goldfish_mmc_save(QEMUFile*  f, void*  opaque)
-{
-    struct goldfish_mmc_state*  s = opaque;
-
-    qemu_put_struct(f, goldfish_mmc_fields, s);
-}
-
-static int  goldfish_mmc_load(QEMUFile*  f, void*  opaque, int  version_id)
-{
-    struct goldfish_mmc_state*  s = opaque;
-
-    if (version_id != GOLDFISH_MMC_SAVE_VERSION)
-        return -1;
-
-    return qemu_get_struct(f, goldfish_mmc_fields, s);
-}
-#endif
 struct mmc_opcode {
     const char* name;
     int cmd;
